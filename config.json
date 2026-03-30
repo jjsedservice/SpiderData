@@ -1,0 +1,70 @@
+{
+    "sources": [
+        {
+            "name": "浙江",
+            "list_api": {
+                "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipDisclosureApply/queryIpDisclosureApply",
+                "method": "POST",
+                "json_params": {
+                    "data": {
+                        "operateTimeArr": [],
+                        "sourceName": "",
+                        "customInfoName": "",
+                        "columnNos": [
+                            "caf8d7af-0252-49cd-88ba-78e55cb62aa8"
+                        ],
+                        "isUsed": "1",
+                        "marketId": ""
+                    },
+                    "pageInfo": {
+                        "pageSizes": [
+                            10,
+                            20,
+                            50,
+                            100,
+                            200,
+                            500,
+                            1000
+                        ],
+                        "pageSize": 20,
+                        "pageNum": 1
+                    }
+                },
+                "list_path": "data.list",
+                "id_field": "guid",
+                "pagination": {
+                    "total_path": "data.total",
+                    "page_num_path": "pageInfo.pageNum",
+                    "page_size": 20
+                }
+            },
+            "detail_api": {
+                "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipGhFdEnterprise/selectDataById",
+                "method": "POST",
+                "json_params": {
+                    "applyId": "{id}",
+                    "flag": "1"
+                },
+                "id_placeholder": "{id}"
+            }
+        }
+    ],
+    "request_settings": {
+        "min_delay": 2.0,
+        "max_delay": 5.0,
+        "user_agents": [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+        ],
+        "proxies": {},
+        "max_retries": 3,
+        "retry_delay": 5.0
+    },
+    "ollama": {
+        "host": "http://localhost:11434",
+        "model": "qwen3.5:9b"
+    },
+    "csv_file": "data.csv"
+}
