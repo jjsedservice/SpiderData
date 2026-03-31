@@ -198,6 +198,7 @@
     let sharedInfoWindow = null;
     const markerEntries = [];
     let successItems = [];
+    const DEFAULT_VISIBLE_POWER_TYPES = new Set(["风电", "太阳能发电"]);
 
     function showError(message) {
       statusEl.className = "error";
@@ -235,7 +236,7 @@
       `;
     }
 
-    function addMarker(item) {
+    function addMarker(item, selectedPowerTypes) {
       const lng = Number(item.lon);
       const lat = Number(item.lat);
       if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
@@ -251,16 +252,20 @@
         marker.openInfoWindow(sharedInfoWindow);
       });
 
-      map.addOverLay(marker);
+      const powerType = item.power_type || "未标注";
+      if (!selectedPowerTypes || selectedPowerTypes.has(powerType)) {
+        map.addOverLay(marker);
+      }
       markerEntries.push({ marker, item });
     }
 
     function addMarkersInBatches(items, batchSize = 200) {
       let index = 0;
+      const selectedPowerTypes = getSelectedPowerTypes();
 
       function renderBatch() {
         const batch = items.slice(index, index + batchSize);
-        batch.forEach(addMarker);
+        batch.forEach((item) => addMarker(item, selectedPowerTypes));
         index += batch.length;
 
         statusEl.textContent = `正在渲染点位 ${index}/${items.length}...`;
@@ -270,7 +275,6 @@
           return;
         }
 
-        applyPowerTypeFilter();
         statusEl.textContent = `已加载 ${items.length} 个点位，卫星图预览完成。`;
         if (items.length > 0) {
           const points = items.map((item) => new T.LngLat(Number(item.lon), Number(item.lat)));
@@ -355,7 +359,7 @@
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.value = powerType;
-        checkbox.checked = true;
+        checkbox.checked = DEFAULT_VISIBLE_POWER_TYPES.has(powerType);
         checkbox.dataset.role = "power-type";
         checkbox.addEventListener("change", applyPowerTypeFilter);
 
