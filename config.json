@@ -1,70 +1,138 @@
 {
-    "sources": [
-        {
-            "name": "浙江",
-            "list_api": {
-                "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipDisclosureApply/queryIpDisclosureApply",
-                "method": "POST",
-                "json_params": {
-                    "data": {
-                        "operateTimeArr": [],
-                        "sourceName": "",
-                        "customInfoName": "",
-                        "columnNos": [
-                            "caf8d7af-0252-49cd-88ba-78e55cb62aa8"
-                        ],
-                        "isUsed": "1",
-                        "marketId": ""
-                    },
-                    "pageInfo": {
-                        "pageSizes": [
-                            10,
-                            20,
-                            50,
-                            100,
-                            200,
-                            500,
-                            1000
-                        ],
-                        "pageSize": 20,
-                        "pageNum": 1
-                    }
-                },
-                "list_path": "data.list",
-                "id_field": "guid",
-                "pagination": {
-                    "total_path": "data.total",
-                    "page_num_path": "pageInfo.pageNum",
-                    "page_size": 20
-                }
-            },
-            "detail_api": {
-                "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipGhFdEnterprise/selectDataById",
-                "method": "POST",
-                "json_params": {
-                    "applyId": "{id}",
-                    "flag": "1"
-                },
-                "id_placeholder": "{id}"
-            }
+  "power_type_mapping": {
+    "020000": "火电",
+    "040000": "风电",
+    "010000": "水电",
+    "050000": "太阳能发电",
+    "太阳能发电": [
+      "050100",
+      "050200"
+    ]
+  },
+  "sources": [
+    {
+      "name": "浙江",
+      "fetch_mode": "list_then_detail",
+      "list_api": {
+        "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipDisclosureApply/queryIpDisclosureApply",
+        "method": "POST",
+        "json_params": {
+          "data": {
+            "operateTimeArr": [],
+            "sourceName": "",
+            "customInfoName": "",
+            "columnNos": [
+              "caf8d7af-0252-49cd-88ba-78e55cb62aa8"
+            ],
+            "isUsed": "1",
+            "marketId": ""
+          },
+          "pageInfo": {
+            "pageSizes": [
+              10,
+              20,
+              50,
+              100,
+              200,
+              500,
+              1000
+            ],
+            "pageSize": 20,
+            "pageNum": 1
+          }
+        },
+        "list_path": "data.list",
+        "id_field": "guid",
+        "pagination": {
+          "total_path": "data.total",
+          "page_size": 20
         }
-    ],
-    "request_settings": {
-        "min_delay": 2.0,
-        "max_delay": 5.0,
-        "user_agents": [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+      },
+      "detail_api": {
+        "url": "https://zjpx.com.cn/px-settlement-infpubmeex-phbzj/ipGhFdEnterprise/selectDataById",
+        "method": "POST",
+        "json_params": {
+          "applyId": "{id}",
+          "flag": "1"
+        },
+        "id_placeholder": "{id}"
+      },
+      "extraction_mapping": {
+        "社会统一信用代码": "data.ipGhFdEnterprise.creditCode",
+        "企业名称": "data.ipGhFdEnterprise.membersName",
+        "发电类型": [
+          "data.ipGhFdEnterprise.generatorType"
         ],
-        "proxies": {},
-        "max_retries": 3,
-        "retry_delay": 5.0
+        "装机容量": "data.ipGhFdEnterprise.generatorRatedCap"
+      }
     },
-    "ollama": {
-        "host": "http://localhost:11434",
-        "model": "qwen3.5:9b"
-    },
-    "csv_file": "data.csv"
+    {
+      "name": "云南",
+      "fetch_mode": "list_only",
+      "list_api": {
+        "url": "https://www.kmpex.com/sys/disclosure/infomationsubmit-service/plantinfo/public/getPlantInfoPageList/page/access",
+        "method": "POST",
+        "json_params": {
+          "filters": {
+            "checkedValues": {},
+            "searchValue": {
+              "jymc": "",
+              "qymc": "",
+              "ssjt": "",
+              "dylx": ""
+            },
+            "selectedValues": {},
+            "timeChangeValues": {},
+            "timeInpValue": {},
+            "timeSelect": {},
+            "timeValues": {}
+          },
+          "index": "",
+          "params": {
+            "asc": true,
+            "currentPage": 1,
+            "filterValue": "",
+            "pageSize": 12,
+            "sortField": "",
+            "sortOrder": ""
+          }
+        },
+        "list_path": "data.rows",
+        "pagination": {
+          "total_path": "data.total",
+          "page_size": 12
+        }
+      },
+      "extraction_mapping": {
+        "社会统一信用代码": "tyxydm",
+        "企业名称": {
+          "mode": "concat",
+          "paths": [
+            "logonName",
+            "jymc"
+          ],
+          "separator": "_"
+        },
+        "发电类型": [
+          "dylx"
+        ],
+        "装机容量": "zjrl"
+      }
+    }
+  ],
+  "request_settings": {
+    "min_delay": 2.0,
+    "max_delay": 5.0,
+    "detail_request_interval": 1.0,
+    "user_agents": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+    ],
+    "proxies": {},
+    "max_retries": 3,
+    "retry_delay": 5.0
+  },
+  "csv_file": "data.csv"
 }

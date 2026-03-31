@@ -1,11 +1,19 @@
+import copy
 import json
-import requests
-import pandas as pd
-import time
 import random
-import sys
 import re
+import sys
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+
+import pandas as pd
+import requests
+
+
+TARGET_FIELDS = ['地区', '社会统一信用代码', '企业名称', '发电类型', '装机容量', '更新时间']
+TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 class ScraperHelper:
@@ -19,9 +27,13 @@ class ScraperHelper:
         self.max_retries = self.settings.get('max_retries', 3)
         self.retry_delay = self.settings.get('retry_delay', 5.0)
         self.timeout = self.settings.get('timeout', 30)
+        self.detail_request_interval = float(self.settings.get('detail_request_interval', 1.0))
 
         self.session = requests.Session()
         self.session.proxies.update(self.proxies)
+
+        self._detail_request_lock = threading.Lock()
+        self._last_detail_request_at = 0.0
 
     def get_random_headers(self):
         return {
@@ -32,6 +44,17 @@ class ScraperHelper:
             "Referer": "https://pmos.hn.sgcc.com.cn/"
         }
 
+    def wait_for_detail_slot(self):
+        if self.detail_request_interval <= 0:
+            return
+
+        with self._detail_request_lock:
+            now = time.monotonic()
+            wait_seconds = self.detail_request_interval - (now - self._last_detail_request_at)
+            if wait_seconds > 0:
+                time.sleep(wait_seconds)
+            self._last_detail_request_at = time.monotonic()
+
     def safe_request(self, method, url, **kwargs):
         min_d = self.settings.get('min_delay', 0.5)
         max_d = self.settings.get('max_delay', 1.5)
@@ -40,8 +63,9 @@ class ScraperHelper:
         for attempt in range(self.max_retries + 1):
             try:
                 headers = self.get_random_headers()
-                if 'headers' in kwargs:
-                    headers.update(kwargs.pop('headers'))
+                custom_headers = kwargs.pop('headers', None)
+                if custom_headers:
+                    headers.update(custom_headers)
 
                 response = self.session.request(
                     method=method,
@@ -81,12 +105,21 @@ class ScraperHelper:
 def get_nested_value(data, key_path):
     if not key_path:
         return data
+
+    value = data
     try:
-        keys = key_path.split('.')
-        value = data
-        for key in keys:
-            if isinstance(value, dict) and key in value:
-                value = value[key]
+        for raw_key in str(key_path).split('.'):
+            if isinstance(value, list):
+                if not raw_key.isdigit():
+                    return None
+                index = int(raw_key)
+                if index < 0 or index >= len(value):
+                    return None
+                value = value[index]
+            elif isinstance(value, dict):
+                if raw_key not in value:
+                    return None
+                value = value[raw_key]
             else:
                 return None
         return value
@@ -106,26 +139,49 @@ def set_nested_value(data, key_path, new_value):
     current[keys[-1]] = new_value
 
 
-def get_company_ids(helper, list_api_config):
+def find_pagination_request_path(data, prefixes=None):
+    if prefixes is None:
+        prefixes = []
+
+    if isinstance(data, dict):
+        for key, value in data.items():
+            current_path = prefixes + [key]
+            lowered_key = key.lower()
+            if lowered_key in ['pagenum', 'currentpage', 'page', 'pageindex'] and isinstance(value, (int, float)):
+                return '.'.join(current_path)
+
+            found_path = find_pagination_request_path(value, current_path)
+            if found_path:
+                return found_path
+
+    if isinstance(data, list):
+        return None
+
+    return None
+
+
+def iterate_list_pages(helper, list_api_config):
     url = list_api_config.get('url')
     if not url:
         print("  [错误] 列表 API 配置中缺少 URL")
-        return []
+        return
 
     method = list_api_config.get('method', 'POST').upper()
     json_params = list_api_config.get('json_params', {})
     pagination = list_api_config.get('pagination')
 
-    all_ids = []
+    request_page_path = None
     current_page = 1
     total_pages = 1
 
     while current_page <= total_pages:
-        current_params = json_params.copy()
+        current_params = copy.deepcopy(json_params)
         if pagination:
-            page_num_path = pagination.get('page_num_path')
-            if page_num_path:
-                set_nested_value(current_params, page_num_path, current_page)
+            if request_page_path is None:
+                request_page_path = find_pagination_request_path(current_params)
+
+            if request_page_path:
+                set_nested_value(current_params, request_page_path, current_page)
                 print(f"  正在请求第 {current_page}/{total_pages} 页...")
 
         response = helper.safe_request(method, url, json=current_params)
@@ -146,14 +202,8 @@ def get_company_ids(helper, list_api_config):
             items = get_nested_value(data, list_path)
 
             if items and isinstance(items, list):
-                id_field = list_api_config.get('id_field')
-                page_ids_count = 0
-                for item in items:
-                    val = get_nested_value(item, id_field)
-                    if val:
-                        all_ids.append(str(val))
-                        page_ids_count += 1
-                print(f"  本页获取到 {page_ids_count} 个 ID")
+                print(f"  本页获取到 {len(items)} 条记录")
+                yield current_page, total_pages, items
             else:
                 print(f"  [提示] 第 {current_page} 页未能找到列表数据")
                 break
@@ -167,7 +217,17 @@ def get_company_ids(helper, list_api_config):
             print(f"  [错误] 解析第 {current_page} 页 JSON 失败: {str(e)}")
             break
 
-    return all_ids
+
+def get_company_ids_from_list_items(list_items, id_field):
+    company_ids = []
+    if not id_field:
+        return company_ids
+
+    for item in list_items:
+        value = get_nested_value(item, id_field)
+        if not is_empty_value(value):
+            company_ids.append(str(value).strip())
+    return company_ids
 
 
 def get_company_details(helper, detail_api_config, company_id):
@@ -177,21 +237,21 @@ def get_company_details(helper, detail_api_config, company_id):
         return None
 
     method = detail_api_config.get('method', 'POST').upper()
-    params = detail_api_config.get('json_params', {}).copy()
+    params = copy.deepcopy(detail_api_config.get('json_params', {}))
     id_placeholder = detail_api_config.get('id_placeholder', '{id}')
 
     def replace_id(obj, placeholder, replacement):
         if isinstance(obj, dict):
             return {k: replace_id(v, placeholder, replacement) for k, v in obj.items()}
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             return [replace_id(v, placeholder, replacement) for v in obj]
-        elif isinstance(obj, str):
+        if isinstance(obj, str):
             return obj.replace(placeholder, replacement)
-        else:
-            return obj
+        return obj
 
     try:
         params = replace_id(params, id_placeholder, company_id)
+        helper.wait_for_detail_slot()
         response = helper.safe_request(method, url, json=params)
         if response:
             return response.json()
@@ -200,24 +260,15 @@ def get_company_details(helper, detail_api_config, company_id):
     return None
 
 
-def normalize_power_type(text):
-    if not text:
-        return None
+def format_number(value):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return value
 
-    text = str(text)
-
-    rules = [
-        (["光伏", "太阳能", "太阳能光伏"], "太阳能发电"),
-        (["风电", "风力", "风力发电"], "风电"),
-        (["水电", "水力", "水力发电"], "水电"),
-        (["核电", "核能"], "核电"),
-        (["火电", "煤电", "燃煤", "燃气发电", "热电"], "火电"),
-    ]
-
-    for keywords, result in rules:
-        if any(k in text for k in keywords):
-            return result
-    return None
+    if number.is_integer():
+        return str(int(number))
+    return format(number, '.15g')
 
 
 def normalize_capacity(value):
@@ -230,169 +281,214 @@ def normalize_capacity(value):
 
     s_clean = s.replace(",", "").replace(" ", "")
 
-    # 2×660MW
-    m = re.search(r'(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(mw|kw|兆瓦|千瓦)', s_clean, re.I)
-    if m:
-        a = float(m.group(1))
-        b = float(m.group(2))
-        unit = m.group(3).lower()
-        val = a * b
+    match = re.search(r'(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(mw|kw|兆瓦|千瓦)', s_clean, re.I)
+    if match:
+        amount = float(match.group(1)) * float(match.group(2))
+        unit = match.group(3).lower()
         if unit in ['kw', '千瓦']:
-            val = val / 1000
-        return str(val)
+            amount = amount / 1000
+        return format_number(amount)
 
-    # 10万千瓦
-    m = re.search(r'(\d+(?:\.\d+)?)\s*万千瓦', s_clean)
-    if m:
-        return str(float(m.group(1)) * 10)
+    match = re.search(r'(\d+(?:\.\d+)?)\s*万千瓦', s_clean)
+    if match:
+        return format_number(float(match.group(1)) * 10)
 
-    # 100MW / 100兆瓦
-    m = re.search(r'(\d+(?:\.\d+)?)\s*(mw|兆瓦)', s_clean, re.I)
-    if m:
-        return str(float(m.group(1)))
+    match = re.search(r'(\d+(?:\.\d+)?)\s*(mw|兆瓦)', s_clean, re.I)
+    if match:
+        return format_number(float(match.group(1)))
 
-    # 100000kW / 100000千瓦
-    m = re.search(r'(\d+(?:\.\d+)?)\s*(kw|千瓦)', s_clean, re.I)
-    if m:
-        return str(float(m.group(1)) / 1000)
+    match = re.search(r'(\d+(?:\.\d+)?)\s*(kw|千瓦)', s_clean, re.I)
+    if match:
+        return format_number(float(match.group(1)) / 1000)
 
-    # 纯数字，默认按 MW
     if re.fullmatch(r'\d+(?:\.\d+)?', s_clean):
-        return s_clean
+        return format_number(s_clean)
 
     return s
 
 
-def extract_company_data_by_rules(company_details):
-    """
-    优先用规则提取，不走 LLM
-    """
-    if not company_details or not isinstance(company_details, dict):
+def normalize_power_type_by_text(text):
+    if not text:
         return None
 
-    root = company_details.get("data", {}) if "data" in company_details else company_details
-    fd = root.get("ipGhFdEnterprise") or {}
-    license_info = root.get("ipGhBusinessLicenseForm") or {}
+    value = str(text)
+    rules = [
+        (["光伏", "太阳能", "太阳能光伏"], "太阳能发电"),
+        (["风电", "风力", "风力发电"], "风电"),
+        (["水电", "水力", "水力发电", "抽水蓄能"], "水电"),
+        (["核电", "核能"], "核电"),
+        (["火电", "煤电", "燃煤", "燃气发电", "热电"], "火电"),
+    ]
 
-    credit_code = fd.get("creditCode")
-    company_name = fd.get("membersName")
-    rated_cap = fd.get("generatorRatedCap")
-    scope = license_info.get("scope")
-    enterprise_type = fd.get("enterpriseType")
-    generator_type = fd.get("generatorType")
+    for keywords, result in rules:
+        if any(keyword in value for keyword in keywords):
+            return result
+    return None
 
-    power_type = None
 
-    # 先看经营范围
-    power_type = normalize_power_type(scope)
+def build_power_type_lookup(config):
+    raw_mapping = config.get('power_type_mapping', {})
+    lookup = {}
 
-    # 再看 enterpriseType
-    if not power_type:
-        power_type = normalize_power_type(enterprise_type)
+    if not isinstance(raw_mapping, dict):
+        return lookup
 
-    # 如有 generatorType 编码映射，可在这里补
-    generator_type_map = {
-        # 示例，具体按你的接口编码补充
-        # "010000": "火电",
-        # "020000": "水电",
-        # "030000": "风电",
-        # "040000": "核电",
-        "050000": "太阳能发电",
-    }
-    if not power_type and generator_type:
-        power_type = generator_type_map.get(str(generator_type))
+    for key, value in raw_mapping.items():
+        normalized_key = str(key).strip()
+
+        if isinstance(value, str):
+            lookup[normalized_key] = value.strip()
+            continue
+
+        if isinstance(value, list):
+            for code in value:
+                lookup[str(code).strip()] = normalized_key
+
+    return lookup
+
+
+def is_empty_value(value):
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip().lower() in ['', 'null', 'none']:
+        return True
+    return False
+
+
+def first_non_empty_value(values):
+    for value in values:
+        if not is_empty_value(value):
+            return value
+    return None
+
+
+def join_non_empty_values(values, separator=''):
+    parts = []
+    for value in values:
+        if is_empty_value(value):
+            continue
+        parts.append(str(value).strip())
+
+    if not parts:
+        return None
+    return separator.join(parts)
+
+
+def extract_value_from_mapping(data, mapping_entry):
+    if isinstance(mapping_entry, str):
+        return get_nested_value(data, mapping_entry)
+
+    if isinstance(mapping_entry, list):
+        return first_non_empty_value(get_nested_value(data, item) for item in mapping_entry)
+
+    if isinstance(mapping_entry, dict):
+        mode = mapping_entry.get('mode', 'first_non_empty')
+        paths = mapping_entry.get('paths', [])
+
+        if not isinstance(paths, list) or not paths:
+            return None
+
+        values = [get_nested_value(data, path) for path in paths]
+
+        if mode == 'concat':
+            separator = mapping_entry.get('separator', '')
+            return join_non_empty_values(values, separator)
+
+        return first_non_empty_value(values)
+
+    return None
+
+
+def resolve_power_type(raw_value, power_type_lookup):
+    if is_empty_value(raw_value):
+        return None
+
+    if isinstance(raw_value, list):
+        for item in raw_value:
+            resolved = resolve_power_type(item, power_type_lookup)
+            if resolved:
+                return resolved
+        return None
+
+    if isinstance(raw_value, (int, float)):
+        raw_value = format_number(raw_value)
+
+    text = str(raw_value).strip()
+    if not text:
+        return None
+
+    mapped = power_type_lookup.get(text)
+    if mapped:
+        return mapped
+
+    normalized = normalize_power_type_by_text(text)
+    if normalized:
+        return normalized
+
+    return text
+
+
+def extract_company_data(source, company_details, power_type_lookup):
+    if not isinstance(company_details, dict):
+        return None
+
+    extraction_mapping = source.get('extraction_mapping', {})
+    if not extraction_mapping:
+        print("    [错误] 当前数据源缺少 extraction_mapping 配置")
+        return None
 
     result = {
-        "社会统一信用代码": credit_code,
-        "企业名称": company_name,
-        "发电类型": power_type,
-        "装机容量": normalize_capacity(rated_cap),
+        '地区': source.get('name')
     }
 
-    # 至少有一个核心字段才算成功
-    if any(result.values()):
+    credit_code = extract_value_from_mapping(company_details, extraction_mapping.get('社会统一信用代码'))
+    company_name = extract_value_from_mapping(company_details, extraction_mapping.get('企业名称'))
+    capacity_raw = extract_value_from_mapping(company_details, extraction_mapping.get('装机容量'))
+    power_type_raw = extract_value_from_mapping(company_details, extraction_mapping.get('发电类型'))
+
+    result['社会统一信用代码'] = None if is_empty_value(credit_code) else str(credit_code).strip()
+    result['企业名称'] = None if is_empty_value(company_name) else str(company_name).strip()
+    result['发电类型'] = resolve_power_type(power_type_raw, power_type_lookup)
+    result['装机容量'] = normalize_capacity(capacity_raw)
+
+    if any(result.get(field) for field in TARGET_FIELDS if field != '地区'):
         return result
     return None
 
 
-def analyze_data_with_ollama(config, company_details):
-    """
-    只有规则提取失败时才调用
-    """
-    if not company_details:
-        return None
-
+def read_existing_csv(csv_file):
     try:
-        url = f"{config['ollama']['host']}/api/chat"
+        existing_df = pd.read_csv(csv_file, dtype=str)
+    except FileNotFoundError:
+        existing_df = pd.DataFrame(columns=TARGET_FIELDS)
 
-        # 压缩输入，不要 indent=2
-        compact_json = json.dumps(company_details, ensure_ascii=False, separators=(",", ":"))
+    for column in TARGET_FIELDS:
+        if column not in existing_df.columns:
+            existing_df[column] = None
+    return existing_df[TARGET_FIELDS]
 
-        prompt = f"""请从输入JSON中提取以下字段，并只返回JSON对象：
-{{
-  "社会统一信用代码": "...",
-  "企业名称": "...",
-  "发电类型": "火电/太阳能发电/风电/水电/核电/null",
-  "装机容量": "..."
-}}
 
-要求：
-1. 只返回JSON
-2. 无法判断填 null
-3. 发电类型只能是：火电、太阳能发电、风电、水电、核电
-4. 不要解释
+def stamp_row_update_time(row):
+    stamped_row = dict(row)
+    stamped_row['更新时间'] = datetime.now().strftime(TIMESTAMP_FORMAT)
+    return stamped_row
 
-输入：
-{compact_json}
-"""
 
-        payload = {
-            "model": config['ollama']['model'],
-            "messages": [{"role": "user", "content": prompt}],
-            "stream": False,
-            "options": {
-                "temperature": 0.0,
-                "num_predict": 128
-            }
-        }
+def process_list_only_source(source, list_items, power_type_lookup):
+    all_rows = []
 
-        response = requests.post(url, json=payload, timeout=45)
-        response.raise_for_status()
-        result = response.json()
-        content = result.get('message', {}).get('content', '')
-
-        start_index = content.find('{')
-        end_index = content.rfind('}') + 1
-        if start_index != -1 and end_index != -1:
-            return json.loads(content[start_index:end_index])
+    for index, item in enumerate(list_items, start=1):
+        print(f"  [{index}/{len(list_items)}] 处理列表记录")
+        extracted_data = extract_company_data(source, item, power_type_lookup)
+        if extracted_data:
+            extracted_data = stamp_row_update_time(extracted_data)
+            name = extracted_data.get('企业名称', '未知')
+            print(f"    * 提取成功: {name}")
+            all_rows.append(extracted_data)
         else:
-            print(f"  [错误] Ollama 响应中未包含有效 JSON: {content[:100]}...")
-    except requests.exceptions.ConnectionError:
-        print("  [错误] 无法连接到本地 Ollama 服务，请确保 Ollama 已启动")
-    except Exception as e:
-        print(f"  [错误] 与 Ollama 通信或解析失败: {str(e)}")
-    return None
+            print("    * 跳过该记录 (映射提取失败)")
 
-
-def extract_company_data(config, company_details):
-    """
-    总提取入口：规则优先，LLM兜底
-    """
-    result = extract_company_data_by_rules(company_details)
-
-    # 四项都齐全就直接返回
-    if result and result.get("社会统一信用代码") and result.get("企业名称"):
-        return result
-
-    print("    [提示] 规则提取不完整，尝试使用 Ollama 兜底...")
-    llm_result = analyze_data_with_ollama(config, company_details)
-
-    if llm_result:
-        merged = result or {}
-        merged.update({k: v for k, v in llm_result.items() if v not in [None, "", "null"]})
-        return merged
-
-    return result
+    return all_rows
 
 
 def save_all_to_csv(config, all_rows):
@@ -403,25 +499,13 @@ def save_all_to_csv(config, all_rows):
 
     try:
         new_df = pd.DataFrame(all_rows)
+        for column in TARGET_FIELDS:
+            if column not in new_df.columns:
+                new_df[column] = None
+        new_df = new_df[TARGET_FIELDS]
 
-        # 统一列顺序
-        columns = ['社会统一信用代码', '企业名称', '发电类型', '装机容量']
-        for c in columns:
-            if c not in new_df.columns:
-                new_df[c] = None
-        new_df = new_df[columns]
-
-        try:
-            old_df = pd.read_csv(csv_file, dtype=str)
-        except FileNotFoundError:
-            old_df = pd.DataFrame(columns=columns)
-
+        old_df = read_existing_csv(csv_file)
         combined = pd.concat([old_df, new_df], ignore_index=True)
-
-        # 按统一社会信用代码去重，保留最后一条
-        if '社会统一信用代码' in combined.columns:
-            combined['社会统一信用代码'] = combined['社会统一信用代码'].astype(str)
-            combined = combined.drop_duplicates(subset=['社会统一信用代码'], keep='last')
 
         combined.to_csv(csv_file, index=False, encoding='utf-8-sig')
         print(f"  已写入 CSV，共 {len(new_df)} 条，本地总计 {len(combined)} 条")
@@ -429,22 +513,44 @@ def save_all_to_csv(config, all_rows):
         print(f"  [错误] 保存 CSV 失败: {str(e)}")
 
 
-def process_one_company(helper, source, config, company_id, index=None, total=None):
-    prefix = f"  [{index}/{total}] " if index is not None and total is not None else "  "
-    print(f"{prefix}处理企业 ID: {company_id}")
+def deduplicate_csv_after_run(config):
+    csv_file = config.get('csv_file', 'data.csv')
+
+    try:
+        df = read_existing_csv(csv_file)
+        if df.empty:
+            return
+
+        key_columns = ['地区', '社会统一信用代码', '企业名称', '发电类型', '装机容量']
+
+        df['__sort_time'] = pd.to_datetime(df['更新时间'], format=TIMESTAMP_FORMAT, errors='coerce')
+        df = df.sort_values(by='__sort_time', ascending=False, na_position='last')
+        df = df.drop_duplicates(subset=key_columns, keep='first')
+        df = df.drop(columns=['__sort_time'])
+        df = df[TARGET_FIELDS]
+
+        df.to_csv(csv_file, index=False, encoding='utf-8-sig')
+        print(f"  已完成去重，当前保留 {len(df)} 条")
+    except Exception as e:
+        print(f"  [错误] CSV 去重失败: {str(e)}")
+
+
+def process_one_company(helper, source, company_id, index, total, power_type_lookup):
+    print(f"  [{index}/{total}] 处理企业 ID: {company_id}")
 
     company_details = get_company_details(helper, source.get('detail_api', {}), company_id)
     if not company_details:
         print("    * 跳过该企业 (无法获取详情数据)")
         return None
 
-    analyzed_data = extract_company_data(config, company_details)
-    if analyzed_data:
-        name = analyzed_data.get('企业名称', '未知')
+    extracted_data = extract_company_data(source, company_details, power_type_lookup)
+    if extracted_data:
+        extracted_data = stamp_row_update_time(extracted_data)
+        name = extracted_data.get('企业名称', '未知')
         print(f"    * 提取成功: {name}")
-        return analyzed_data
+        return extracted_data
 
-    print("    * 跳过该企业 (提取失败)")
+    print("    * 跳过该企业 (映射提取失败)")
     return None
 
 
@@ -466,6 +572,7 @@ def main():
 
     helper = ScraperHelper(config)
     sources = config.get('sources', [])
+    power_type_lookup = build_power_type_lookup(config)
 
     if not sources:
         print("  [提示] 配置文件中没有定义任何数据来源 (sources)")
@@ -475,18 +582,42 @@ def main():
 
     for source in sources:
         source_name = source.get('name', '未命名来源')
+        fetch_mode = source.get('fetch_mode', 'list_then_detail')
         print(f"\n>>> 正在处理来源: {source_name}")
 
-        company_ids = get_company_ids(helper, source.get('list_api', {}))
-        print(f"  - 获取到 {len(company_ids)} 个企业ID")
+        if fetch_mode == 'list_only':
+            total_items = 0
+            for page_number, total_pages, page_items in iterate_list_pages(helper, source.get('list_api', {})):
+                total_items += len(page_items)
+                print(f"  - 正在处理第 {page_number}/{total_pages} 页列表记录")
+                page_rows = process_list_only_source(source, page_items, power_type_lookup)
+                save_all_to_csv(config, page_rows)
+
+            print(f"  - 获取到 {total_items} 条列表记录")
+            continue
+
+        list_items = []
+        for _, _, page_items in iterate_list_pages(helper, source.get('list_api', {})):
+            list_items.extend(page_items)
+
+        print(f"  - 获取到 {len(list_items)} 条列表记录")
+        company_ids = get_company_ids_from_list_items(list_items, source.get('list_api', {}).get('id_field'))
+        print(f"  - 提取到 {len(company_ids)} 个企业ID")
 
         all_rows = []
 
-        # 并发抓详情
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_map = {
-                executor.submit(process_one_company, helper, source, config, company_id, i + 1, len(company_ids)): company_id
-                for i, company_id in enumerate(company_ids)
+                executor.submit(
+                    process_one_company,
+                    helper,
+                    source,
+                    company_id,
+                    index + 1,
+                    len(company_ids),
+                    power_type_lookup
+                ): company_id
+                for index, company_id in enumerate(company_ids)
             }
 
             for future in as_completed(future_map):
@@ -500,6 +631,7 @@ def main():
 
         save_all_to_csv(config, all_rows)
 
+    deduplicate_csv_after_run(config)
     print("\n=== 所有任务处理完毕 ===")
 
 
