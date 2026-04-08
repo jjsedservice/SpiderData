@@ -154,7 +154,7 @@ export async function GET(request: Request) {
         const { db } = await getDatabase();
         const { searchParams } = new URL(request.url);
         const type = (searchParams.get("type") ?? "wind") as EnergyType;
-        const radiusKm = Number(searchParams.get("radiusKm") ?? "5");
+        const radiusKm = Number(searchParams.get("radiusKm") ?? "10");
         const province = (searchParams.get("province") ?? "").trim();
         const farmClauses = [energyMatchClause(type)];
         if (province) {

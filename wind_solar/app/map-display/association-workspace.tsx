@@ -80,6 +80,16 @@ type AssociationPreview = {
     outliers: OutlierPreview[];
 };
 
+type ProvinceBoundary = {
+    rings: BoundaryPoint[][];
+    bounds: {
+        minLng: number;
+        maxLng: number;
+        minLat: number;
+        maxLat: number;
+    } | null;
+};
+
 const tianMapKey = "2d907290b8d600785e0d00bf624fd320";
 const emptyPreview: AssociationPreview = {
     summary: {
@@ -94,12 +104,45 @@ const emptyPreview: AssociationPreview = {
 };
 
 const provinces = [
-    "北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江",
-    "上海", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南",
-    "湖北", "湖南", "广东", "广西", "海南", "重庆", "四川", "贵州",
-    "云南", "西藏", "陕西", "甘肃", "青海", "宁夏", "新疆", "台湾",
-    "香港", "澳门",
-];
+    { name: "北京", adcode: "110000" },
+    { name: "天津", adcode: "120000" },
+    { name: "河北", adcode: "130000" },
+    { name: "山西", adcode: "140000" },
+    { name: "内蒙古", adcode: "150000" },
+    { name: "辽宁", adcode: "210000" },
+    { name: "吉林", adcode: "220000" },
+    { name: "黑龙江", adcode: "230000" },
+    { name: "上海", adcode: "310000" },
+    { name: "江苏", adcode: "320000" },
+    { name: "浙江", adcode: "330000" },
+    { name: "安徽", adcode: "340000" },
+    { name: "福建", adcode: "350000" },
+    { name: "江西", adcode: "360000" },
+    { name: "山东", adcode: "370000" },
+    { name: "河南", adcode: "410000" },
+    { name: "湖北", adcode: "420000" },
+    { name: "湖南", adcode: "430000" },
+    { name: "广东", adcode: "440000" },
+    { name: "广西", adcode: "450000" },
+    { name: "海南", adcode: "460000" },
+    { name: "重庆", adcode: "500000" },
+    { name: "四川", adcode: "510000" },
+    { name: "贵州", adcode: "520000" },
+    { name: "云南", adcode: "530000" },
+    { name: "西藏", adcode: "540000" },
+    { name: "陕西", adcode: "610000" },
+    { name: "甘肃", adcode: "620000" },
+    { name: "青海", adcode: "630000" },
+    { name: "宁夏", adcode: "640000" },
+    { name: "新疆", adcode: "650000" },
+    { name: "台湾", adcode: "710000" },
+    { name: "香港", adcode: "810000" },
+    { name: "澳门", adcode: "820000" },
+] as const;
+
+const provinceCodeMap = Object.fromEntries(
+    provinces.map((province) => [province.name, province.adcode]),
+) as Record<string, string>;
 
 const compactFieldSx = {
     "& .MuiInputBase-root": {
@@ -126,7 +169,9 @@ export default function AssociationWorkspace() {
 
     const [scriptReady, setScriptReady] = useState(false);
     const [preview, setPreview] = useState<AssociationPreview | null>(null);
+    const [provinceBoundary, setProvinceBoundary] = useState<ProvinceBoundary | null>(null);
     const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
+    const [provinceMaskPath, setProvinceMaskPath] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hoverPreview, setHoverPreview] = useState<{
@@ -139,11 +184,11 @@ export default function AssociationWorkspace() {
     } | null>(null);
     const [filters, setFilters] = useState({
         type: "wind" as EnergyType,
-        radiusKm: "5",
+        radiusKm: "10",
         province: "云南",
     });
     const summary = preview?.summary ?? emptyPreview.summary;
-    const radiusMeters = Math.max(Number(filters.radiusKm) || 5, 0.1) * 1000;
+    const radiusMeters = Math.max(Number(filters.radiusKm) || 10, 0.1) * 1000;
 
     const selectedFarm = useMemo(
         () => preview?.farms.find((farm) => farm.id === selectedFarmId) ?? null,
@@ -165,9 +210,16 @@ export default function AssociationWorkspace() {
         map.centerAndZoom(new window.T.LngLat(102.7, 25.0), 7);
         map.enableScrollWheelZoom();
         mapInstanceRef.current = map;
+        const syncMask = () => {
+            updateProvinceMaskPath();
+        };
+        map.addEventListener?.("moveend", syncMask);
+        map.addEventListener?.("zoomend", syncMask);
+        map.addEventListener?.("resize", syncMask);
 
         setTimeout(() => {
             map.checkResize?.();
+            syncMask();
         }, 0);
     }, [scriptReady]);
 
@@ -179,12 +231,20 @@ export default function AssociationWorkspace() {
     }, [scriptReady, filters]);
 
     useEffect(() => {
+        void loadProvinceBoundary(filters.province);
+    }, [filters.province]);
+
+    useEffect(() => {
         if (!mapInstanceRef.current || !preview) {
             return;
         }
 
         renderMap();
     }, [preview, selectedFarmId]);
+
+    useEffect(() => {
+        updateProvinceMaskPath();
+    }, [provinceBoundary, selectedFarmId]);
 
     async function loadPreview() {
         setLoading(true);
@@ -209,6 +269,99 @@ export default function AssociationWorkspace() {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function loadProvinceBoundary(province: string) {
+        const adcode = provinceCodeMap[province];
+        if (!adcode) {
+            setProvinceBoundary(null);
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://geo.datav.aliyun.com/areas_v3/bound/${adcode}_full.json`);
+            const payload = await response.json();
+            const rings: BoundaryPoint[][] = [];
+
+            for (const feature of payload.features ?? []) {
+                const geometry = feature.geometry;
+                if (geometry?.type === "Polygon") {
+                    const [outerRing] = geometry.coordinates ?? [];
+                    if (outerRing?.length) {
+                        rings.push(
+                            outerRing.map(([lng, lat]: [number, number]) => ({ lng, lat })),
+                        );
+                    }
+                }
+                if (geometry?.type === "MultiPolygon") {
+                    for (const polygon of geometry.coordinates ?? []) {
+                        const [outerRing] = polygon;
+                        if (outerRing?.length) {
+                            rings.push(
+                                outerRing.map(([lng, lat]: [number, number]) => ({ lng, lat })),
+                            );
+                        }
+                    }
+                }
+            }
+
+            const allPoints = rings.flat();
+            if (!allPoints.length) {
+                setProvinceBoundary(null);
+                return;
+            }
+
+            setProvinceBoundary({
+                rings,
+                bounds: {
+                    minLng: Math.min(...allPoints.map((point) => point.lng)),
+                    maxLng: Math.max(...allPoints.map((point) => point.lng)),
+                    minLat: Math.min(...allPoints.map((point) => point.lat)),
+                    maxLat: Math.max(...allPoints.map((point) => point.lat)),
+                },
+            });
+        } catch {
+            setProvinceBoundary(null);
+        }
+    }
+
+    function updateProvinceMaskPath() {
+        const map = mapInstanceRef.current;
+        const container = mapRef.current;
+        if (!map || !container || !provinceBoundary?.rings.length || selectedFarmId !== null) {
+            setProvinceMaskPath("");
+            return;
+        }
+
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        if (!width || !height) {
+            setProvinceMaskPath("");
+            return;
+        }
+
+        const ringPaths = provinceBoundary.rings
+            .map((ring) => {
+                const points = ring
+                    .map((point) => map.lngLatToContainerPoint?.(new window.T.LngLat(point.lng, point.lat)))
+                    .filter((point: any) => typeof point?.x === "number" && typeof point?.y === "number");
+
+                if (points.length < 3) {
+                    return "";
+                }
+
+                const [first, ...rest] = points;
+                return `M ${first.x} ${first.y} ${rest.map((point: any) => `L ${point.x} ${point.y}`).join(" ")} Z`;
+            })
+            .filter(Boolean)
+            .join(" ");
+
+        if (!ringPaths) {
+            setProvinceMaskPath("");
+            return;
+        }
+
+        setProvinceMaskPath(`M 0 0 H ${width} V ${height} H 0 Z ${ringPaths}`);
     }
 
     function clearMapOverlays() {
@@ -277,6 +430,30 @@ export default function AssociationWorkspace() {
 
         const points: any[] = [];
 
+        if (provinceBoundary?.rings.length) {
+            provinceBoundary.rings.forEach((ring) => {
+                const boundaryPoints = ring.map((point) => new window.T.LngLat(point.lng, point.lat));
+                const polygon = new window.T.Polygon(boundaryPoints, {
+                    color: "#0f5c43",
+                    weight: 2,
+                    opacity: 0.95,
+                    fillColor: "#dceee5",
+                    fillOpacity: 0.08,
+                });
+                addOverlay(polygon);
+                points.push(...boundaryPoints);
+            });
+
+            if (provinceBoundary.bounds && map.setMaxBounds) {
+                map.setMaxBounds(
+                    new window.T.LngLatBounds(
+                        new window.T.LngLat(provinceBoundary.bounds.minLng, provinceBoundary.bounds.minLat),
+                        new window.T.LngLat(provinceBoundary.bounds.maxLng, provinceBoundary.bounds.maxLat),
+                    ),
+                );
+            }
+        }
+
         preview.farms.forEach((farm) => {
             const point = new window.T.LngLat(farm.longitude, farm.latitude);
             points.push(point);
@@ -329,6 +506,9 @@ export default function AssociationWorkspace() {
         }
 
         const center = new window.T.LngLat(farm.longitude, farm.latitude);
+        if (map.setMaxBounds) {
+            map.setMaxBounds(null);
+        }
         const farmMarker = new window.T.Marker(center);
         addOverlay(farmMarker);
 
@@ -462,8 +642,8 @@ export default function AssociationWorkspace() {
                                     }
                                 >
                                     {provinces.map((province) => (
-                                        <MenuItem key={province} value={province}>
-                                            {province}
+                                        <MenuItem key={province.adcode} value={province.name}>
+                                            {province.name}
                                         </MenuItem>
                                     ))}
                                 </TextField>
@@ -535,6 +715,27 @@ export default function AssociationWorkspace() {
                                     backgroundColor: "#dfe8de",
                                 }}
                             />
+                            {provinceMaskPath ? (
+                                <Box
+                                    component="svg"
+                                    viewBox={`0 0 ${mapRef.current?.clientWidth ?? 1} ${mapRef.current?.clientHeight ?? 1}`}
+                                    preserveAspectRatio="none"
+                                    sx={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        zIndex: 4,
+                                        pointerEvents: "none",
+                                    }}
+                                >
+                                    <path
+                                        d={provinceMaskPath}
+                                        fill="rgba(255,255,255,0.88)"
+                                        fillRule="evenodd"
+                                    />
+                                </Box>
+                            ) : null}
                             {hoverPreview ? (
                                 <Box
                                     sx={{
