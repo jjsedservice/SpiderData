@@ -1,0 +1,3 @@
+windImageDir: "wind_result/map"
+solarImageDir: "solar_result/map"
+dataFile: "data/default.sqlite"

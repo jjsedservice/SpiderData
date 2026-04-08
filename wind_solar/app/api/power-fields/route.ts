@@ -1,0 +1,158 @@
+import { NextResponse } from "next/server";
+import { escapeSql, execRows, getDatabase } from "@/lib/db";
+
+function confidenceClause(level: string | null) {
+    if (level === "high") {
+        return "confidence >= 0.9";
+    }
+    if (level === "medium") {
+        return "confidence >= 0.8 AND confidence < 0.9";
+    }
+    if (level === "low") {
+        return "confidence < 0.8";
+    }
+    return "";
+}
+
+export async function GET(request: Request) {
+    const { db } = await getDatabase();
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get("page") ?? "1");
+    const pageSize = Number(searchParams.get("pageSize") ?? "10");
+    const enterpriseName = (searchParams.get("enterpriseName") ?? "").trim();
+    const province = (searchParams.get("province") ?? "").trim();
+    const confidenceLevel = searchParams.get("confidenceLevel");
+
+    const clauses: string[] = [];
+    const params: Record<string, unknown> = {};
+
+    if (enterpriseName) {
+        clauses.push("enterprise_name LIKE @enterpriseName");
+        params.enterpriseName = `%${enterpriseName}%`;
+    }
+    if (province) {
+        clauses.push("province LIKE @province");
+        params.province = `%${province}%`;
+    }
+    const confidence = confidenceClause(confidenceLevel);
+    if (confidence) {
+        clauses.push(confidence);
+    }
+
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+    const resolvedWhere = where
+        .replaceAll("@enterpriseName", `'${escapeSql(String(params.enterpriseName ?? ""))}'`)
+        .replaceAll("@province", `'${escapeSql(String(params.province ?? ""))}'`);
+    const total = execRows<{ count: number }>(
+        db,
+        `SELECT COUNT(*) as count FROM power_fields ${resolvedWhere}`,
+    )[0];
+    const rows = execRows(
+        db,
+        `SELECT * FROM power_fields ${resolvedWhere} ORDER BY id DESC LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`,
+    );
+
+    return NextResponse.json({ ok: true, rows, total: total?.count ?? 0 });
+}
+
+export async function POST(request: Request) {
+    const body = await request.json();
+    const { db, persist } = await getDatabase();
+    db.run(`
+        INSERT INTO power_fields (
+            enterprise_name, subject_name, site_name, capacity, longitude, latitude, supplement,
+            raw_address, standardized_address, province, city, district, town, village,
+            group_name, confidence, updated_at
+        ) VALUES (
+            '${escapeSql(body.enterprise_name ?? "")}',
+            '${escapeSql(body.subject_name ?? "")}',
+            '${escapeSql(body.site_name ?? "")}',
+            '${escapeSql(body.capacity ?? "")}',
+            '${escapeSql(body.longitude ?? "")}',
+            '${escapeSql(body.latitude ?? "")}',
+            '${escapeSql(body.supplement ?? "")}',
+            '${escapeSql(body.raw_address ?? "")}',
+            '${escapeSql(body.standardized_address ?? "")}',
+            '${escapeSql(body.province ?? "")}',
+            '${escapeSql(body.city ?? "")}',
+            '${escapeSql(body.district ?? "")}',
+            '${escapeSql(body.town ?? "")}',
+            '${escapeSql(body.village ?? "")}',
+            '${escapeSql(body.group_name ?? "")}',
+            ${Number(body.confidence ?? 0)},
+            CURRENT_TIMESTAMP
+        )
+    `);
+    await persist();
+
+    return NextResponse.json({ ok: true });
+}
+
+export async function PUT(request: Request) {
+    const body = await request.json();
+    const { db, persist } = await getDatabase();
+    db.run(`
+        UPDATE power_fields SET
+            enterprise_name='${escapeSql(body.enterprise_name ?? "")}',
+            subject_name='${escapeSql(body.subject_name ?? "")}',
+            site_name='${escapeSql(body.site_name ?? "")}',
+            capacity='${escapeSql(body.capacity ?? "")}',
+            longitude='${escapeSql(body.longitude ?? "")}',
+            latitude='${escapeSql(body.latitude ?? "")}',
+            supplement='${escapeSql(body.supplement ?? "")}',
+            raw_address='${escapeSql(body.raw_address ?? "")}',
+            standardized_address='${escapeSql(body.standardized_address ?? "")}',
+            province='${escapeSql(body.province ?? "")}',
+            city='${escapeSql(body.city ?? "")}',
+            district='${escapeSql(body.district ?? "")}',
+            town='${escapeSql(body.town ?? "")}',
+            village='${escapeSql(body.village ?? "")}',
+            group_name='${escapeSql(body.group_name ?? "")}',
+            confidence=${Number(body.confidence ?? 0)},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE id=${Number(body.id ?? 0)}
+    `);
+    await persist();
+
+    return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(request: Request) {
+    const body = await request.json();
+    const { db, persist } = await getDatabase();
+    const mode = body.mode as "all" | "filtered" | "single";
+
+    if (mode === "all") {
+        db.run("DELETE FROM power_fields");
+        await persist();
+        return NextResponse.json({ ok: true });
+    }
+
+    if (mode === "single") {
+        db.run(`DELETE FROM power_fields WHERE id = ${Number(body.id ?? 0)}`);
+        await persist();
+        return NextResponse.json({ ok: true });
+    }
+
+    const clauses: string[] = [];
+    const params: Record<string, unknown> = {};
+    if (body.enterpriseName) {
+        clauses.push("enterprise_name LIKE @enterpriseName");
+        params.enterpriseName = `%${String(body.enterpriseName)}%`;
+    }
+    if (body.province) {
+        clauses.push("province LIKE @province");
+        params.province = `%${String(body.province)}%`;
+    }
+    const confidence = confidenceClause(body.confidenceLevel ?? null);
+    if (confidence) {
+        clauses.push(confidence);
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+    const resolvedWhere = where
+        .replaceAll("@enterpriseName", `'${escapeSql(String(params.enterpriseName ?? ""))}'`)
+        .replaceAll("@province", `'${escapeSql(String(params.province ?? ""))}'`);
+    db.run(`DELETE FROM power_fields ${resolvedWhere}`);
+    await persist();
+    return NextResponse.json({ ok: true });
+}
