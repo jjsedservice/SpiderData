@@ -40,6 +40,7 @@ type PowerFieldRow = {
     enterprise_name: string;
     subject_name: string;
     site_name: string;
+    power_type: string;
     capacity: string;
     longitude: string;
     latitude: string;
@@ -90,11 +91,22 @@ const compactFieldSx = {
         py: 1,
     },
 };
+const dialogFieldProps = {
+    fullWidth: true,
+    variant: "outlined" as const,
+    sx: {
+        "& .MuiInputBase-root": {
+            minHeight: 56,
+            alignItems: "center",
+        },
+    },
+};
 
 const defaultPowerFieldForm: Omit<PowerFieldRow, "id"> = {
     enterprise_name: "",
     subject_name: "",
     site_name: "",
+    power_type: "",
     capacity: "",
     longitude: "",
     latitude: "",
@@ -156,8 +168,8 @@ export default function DataImportDashboard() {
     const [powerTotal, setPowerTotal] = useState(0);
     const [powerPage, setPowerPage] = useState(0);
     const [powerFilters, setPowerFilters] = useState({
-        enterpriseName: "",
-        province: "",
+        keyword: "",
+        powerType: "",
         confidenceLevel: "",
     });
     const [powerError, setPowerError] = useState<string | null>(null);
@@ -212,8 +224,8 @@ export default function DataImportDashboard() {
             const params = new URLSearchParams({
                 page: String(powerPage + 1),
                 pageSize: String(pageSize),
-                enterpriseName: powerFilters.enterpriseName,
-                province: powerFilters.province,
+                keyword: powerFilters.keyword,
+                powerType: powerFilters.powerType,
                 confidenceLevel: powerFilters.confidenceLevel,
             });
             const payload = await fetchJson<{ ok: true } & TableResponse<PowerFieldRow>>(
@@ -346,6 +358,7 @@ export default function DataImportDashboard() {
                       enterprise_name: row.enterprise_name,
                       subject_name: row.subject_name,
                       site_name: row.site_name,
+                      power_type: row.power_type,
                       capacity: row.capacity,
                       longitude: row.longitude,
                       latitude: row.latitude,
@@ -433,28 +446,28 @@ export default function DataImportDashboard() {
             >
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                     <TextField
-                        label="企业名"
+                        label="省份 / 企业名"
                         size="small"
-                        sx={{ minWidth: 180, ...compactFieldSx }}
-                        value={powerFilters.enterpriseName}
+                        sx={{ minWidth: 240, ...compactFieldSx }}
+                        value={powerFilters.keyword}
                         onChange={(event) => {
                             setPowerPage(0);
                             setPowerFilters((current) => ({
                                 ...current,
-                                enterpriseName: event.target.value,
+                                keyword: event.target.value,
                             }));
                         }}
                     />
                     <TextField
-                        label="省份"
+                        label="发电类型"
                         size="small"
                         sx={{ minWidth: 160, ...compactFieldSx }}
-                        value={powerFilters.province}
+                        value={powerFilters.powerType}
                         onChange={(event) => {
                             setPowerPage(0);
                             setPowerFilters((current) => ({
                                 ...current,
-                                province: event.target.value,
+                                powerType: event.target.value,
                             }));
                         }}
                     />
@@ -483,8 +496,8 @@ export default function DataImportDashboard() {
                         onClick={() => {
                             setPowerPage(0);
                             setPowerFilters({
-                                enterpriseName: "",
-                                province: "",
+                                keyword: "",
+                                powerType: "",
                                 confidenceLevel: "",
                             });
                         }}
@@ -559,9 +572,10 @@ export default function DataImportDashboard() {
                                         minWidth: 180,
                                     }}
                                 >
-                                    主体名称
+                                    企业名称
                                 </TableCell>
-                                <TableCell>站点名称</TableCell>
+                                <TableCell>场站名</TableCell>
+                                <TableCell>发电类型</TableCell>
                                 <TableCell sx={{ minWidth: 110 }}>装机容量(MW)</TableCell>
                                 <TableCell>经度</TableCell>
                                 <TableCell>纬度</TableCell>
@@ -598,9 +612,10 @@ export default function DataImportDashboard() {
                                             minWidth: 180,
                                         }}
                                     >
-                                        {row.subject_name}
+                                        {row.enterprise_name}
                                     </TableCell>
                                     <TableCell>{row.site_name}</TableCell>
+                                    <TableCell>{row.power_type}</TableCell>
                                     <TableCell sx={{ minWidth: 110 }}>{row.capacity}</TableCell>
                                     <TableCell>{row.longitude}</TableCell>
                                     <TableCell>{row.latitude}</TableCell>
@@ -773,22 +788,23 @@ export default function DataImportDashboard() {
                 <DialogTitle>{editingPowerRow ? "编辑电场数据" : "新增电场数据"}</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} sx={{ pt: 1 }}>
-                        <TextField size="medium" label="企业名称" value={powerForm.enterprise_name} onChange={(event) => setPowerForm((current) => ({ ...current, enterprise_name: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="主体名称" value={powerForm.subject_name} onChange={(event) => setPowerForm((current) => ({ ...current, subject_name: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="站点名称" value={powerForm.site_name} onChange={(event) => setPowerForm((current) => ({ ...current, site_name: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="装机容量(MW)" value={powerForm.capacity} onChange={(event) => setPowerForm((current) => ({ ...current, capacity: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="经度" value={powerForm.longitude} onChange={(event) => setPowerForm((current) => ({ ...current, longitude: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="纬度" value={powerForm.latitude} onChange={(event) => setPowerForm((current) => ({ ...current, latitude: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="补充信息" value={powerForm.supplement} onChange={(event) => setPowerForm((current) => ({ ...current, supplement: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="原始地址片段" value={powerForm.raw_address} onChange={(event) => setPowerForm((current) => ({ ...current, raw_address: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="标准化地址" value={powerForm.standardized_address} onChange={(event) => setPowerForm((current) => ({ ...current, standardized_address: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="省" value={powerForm.province} onChange={(event) => setPowerForm((current) => ({ ...current, province: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="市" value={powerForm.city} onChange={(event) => setPowerForm((current) => ({ ...current, city: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="区" value={powerForm.district} onChange={(event) => setPowerForm((current) => ({ ...current, district: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="乡镇街道" value={powerForm.town} onChange={(event) => setPowerForm((current) => ({ ...current, town: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="村社区" value={powerForm.village} onChange={(event) => setPowerForm((current) => ({ ...current, village: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="组设" value={powerForm.group_name} onChange={(event) => setPowerForm((current) => ({ ...current, group_name: event.target.value }))} fullWidth />
-                        <TextField size="medium" label="可信度" type="number" inputProps={{ step: 0.01, min: 0, max: 1 }} value={powerForm.confidence} onChange={(event) => setPowerForm((current) => ({ ...current, confidence: Number(event.target.value) }))} fullWidth />
+                        <TextField {...dialogFieldProps} label="企业名称" value={powerForm.enterprise_name} onChange={(event) => setPowerForm((current) => ({ ...current, enterprise_name: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="主体名称" value={powerForm.subject_name} onChange={(event) => setPowerForm((current) => ({ ...current, subject_name: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="站点名称" value={powerForm.site_name} onChange={(event) => setPowerForm((current) => ({ ...current, site_name: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="发电类型" value={powerForm.power_type} onChange={(event) => setPowerForm((current) => ({ ...current, power_type: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="装机容量(MW)" value={powerForm.capacity} onChange={(event) => setPowerForm((current) => ({ ...current, capacity: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="经度" value={powerForm.longitude} onChange={(event) => setPowerForm((current) => ({ ...current, longitude: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="纬度" value={powerForm.latitude} onChange={(event) => setPowerForm((current) => ({ ...current, latitude: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="补充信息" value={powerForm.supplement} onChange={(event) => setPowerForm((current) => ({ ...current, supplement: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="原始地址片段" value={powerForm.raw_address} onChange={(event) => setPowerForm((current) => ({ ...current, raw_address: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="标准化地址" value={powerForm.standardized_address} onChange={(event) => setPowerForm((current) => ({ ...current, standardized_address: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="省" value={powerForm.province} onChange={(event) => setPowerForm((current) => ({ ...current, province: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="市" value={powerForm.city} onChange={(event) => setPowerForm((current) => ({ ...current, city: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="区" value={powerForm.district} onChange={(event) => setPowerForm((current) => ({ ...current, district: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="乡镇街道" value={powerForm.town} onChange={(event) => setPowerForm((current) => ({ ...current, town: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="村社区" value={powerForm.village} onChange={(event) => setPowerForm((current) => ({ ...current, village: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="组设" value={powerForm.group_name} onChange={(event) => setPowerForm((current) => ({ ...current, group_name: event.target.value }))} />
+                        <TextField {...dialogFieldProps} label="可信度" type="number" inputProps={{ step: 0.01, min: 0, max: 1 }} value={powerForm.confidence} onChange={(event) => setPowerForm((current) => ({ ...current, confidence: Number(event.target.value) }))} />
                     </Stack>
                 </DialogContent>
                 <DialogActions>

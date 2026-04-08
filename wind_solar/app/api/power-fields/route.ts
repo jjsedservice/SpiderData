@@ -19,20 +19,23 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get("page") ?? "1");
     const pageSize = Number(searchParams.get("pageSize") ?? "10");
-    const enterpriseName = (searchParams.get("enterpriseName") ?? "").trim();
-    const province = (searchParams.get("province") ?? "").trim();
+    const keyword = (searchParams.get("keyword") ?? "").trim();
+    const powerType = (searchParams.get("powerType") ?? "").trim();
     const confidenceLevel = searchParams.get("confidenceLevel");
 
     const clauses: string[] = [];
     const params: Record<string, unknown> = {};
 
-    if (enterpriseName) {
-        clauses.push("enterprise_name LIKE @enterpriseName");
-        params.enterpriseName = `%${enterpriseName}%`;
+    if (keyword) {
+        const terms = keyword.split(/\s+/).filter(Boolean);
+        terms.forEach((term, index) => {
+            clauses.push(`(enterprise_name LIKE @keyword${index} OR province LIKE @keyword${index})`);
+            params[`keyword${index}`] = `%${term}%`;
+        });
     }
-    if (province) {
-        clauses.push("province LIKE @province");
-        params.province = `%${province}%`;
+    if (powerType) {
+        clauses.push("power_type LIKE @powerType");
+        params.powerType = `%${powerType}%`;
     }
     const confidence = confidenceClause(confidenceLevel);
     if (confidence) {
@@ -40,9 +43,15 @@ export async function GET(request: Request) {
     }
 
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-    const resolvedWhere = where
-        .replaceAll("@enterpriseName", `'${escapeSql(String(params.enterpriseName ?? ""))}'`)
-        .replaceAll("@province", `'${escapeSql(String(params.province ?? ""))}'`);
+    let resolvedWhere = where.replaceAll(
+        "@powerType",
+        `'${escapeSql(String(params.powerType ?? ""))}'`,
+    );
+    Object.entries(params).forEach(([key, value]) => {
+        if (key.startsWith("keyword")) {
+            resolvedWhere = resolvedWhere.replaceAll(`@${key}`, `'${escapeSql(String(value))}'`);
+        }
+    });
     const total = execRows<{ count: number }>(
         db,
         `SELECT COUNT(*) as count FROM power_fields ${resolvedWhere}`,
@@ -60,13 +69,14 @@ export async function POST(request: Request) {
     const { db, persist } = await getDatabase();
     db.run(`
         INSERT INTO power_fields (
-            enterprise_name, subject_name, site_name, capacity, longitude, latitude, supplement,
+            enterprise_name, subject_name, site_name, power_type, capacity, longitude, latitude, supplement,
             raw_address, standardized_address, province, city, district, town, village,
             group_name, confidence, updated_at
         ) VALUES (
             '${escapeSql(body.enterprise_name ?? "")}',
             '${escapeSql(body.subject_name ?? "")}',
             '${escapeSql(body.site_name ?? "")}',
+            '${escapeSql(body.power_type ?? "")}',
             '${escapeSql(body.capacity ?? "")}',
             '${escapeSql(body.longitude ?? "")}',
             '${escapeSql(body.latitude ?? "")}',
@@ -96,6 +106,7 @@ export async function PUT(request: Request) {
             enterprise_name='${escapeSql(body.enterprise_name ?? "")}',
             subject_name='${escapeSql(body.subject_name ?? "")}',
             site_name='${escapeSql(body.site_name ?? "")}',
+            power_type='${escapeSql(body.power_type ?? "")}',
             capacity='${escapeSql(body.capacity ?? "")}',
             longitude='${escapeSql(body.longitude ?? "")}',
             latitude='${escapeSql(body.latitude ?? "")}',
@@ -136,22 +147,31 @@ export async function DELETE(request: Request) {
 
     const clauses: string[] = [];
     const params: Record<string, unknown> = {};
-    if (body.enterpriseName) {
-        clauses.push("enterprise_name LIKE @enterpriseName");
-        params.enterpriseName = `%${String(body.enterpriseName)}%`;
+    if (body.keyword) {
+        const terms = String(body.keyword).trim().split(/\s+/).filter(Boolean);
+        terms.forEach((term, index) => {
+            clauses.push(`(enterprise_name LIKE @keyword${index} OR province LIKE @keyword${index})`);
+            params[`keyword${index}`] = `%${term}%`;
+        });
     }
-    if (body.province) {
-        clauses.push("province LIKE @province");
-        params.province = `%${String(body.province)}%`;
+    if (body.powerType) {
+        clauses.push("power_type LIKE @powerType");
+        params.powerType = `%${String(body.powerType)}%`;
     }
     const confidence = confidenceClause(body.confidenceLevel ?? null);
     if (confidence) {
         clauses.push(confidence);
     }
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-    const resolvedWhere = where
-        .replaceAll("@enterpriseName", `'${escapeSql(String(params.enterpriseName ?? ""))}'`)
-        .replaceAll("@province", `'${escapeSql(String(params.province ?? ""))}'`);
+    let resolvedWhere = where.replaceAll(
+        "@powerType",
+        `'${escapeSql(String(params.powerType ?? ""))}'`,
+    );
+    Object.entries(params).forEach(([key, value]) => {
+        if (key.startsWith("keyword")) {
+            resolvedWhere = resolvedWhere.replaceAll(`@${key}`, `'${escapeSql(String(value))}'`);
+        }
+    });
     db.run(`DELETE FROM power_fields ${resolvedWhere}`);
     await persist();
     return NextResponse.json({ ok: true });

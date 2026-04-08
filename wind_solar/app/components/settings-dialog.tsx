@@ -21,6 +21,16 @@ type SettingsDialogProps = {
 };
 
 const ADMIN_PASSWORD = "123@abc";
+const dialogFieldProps = {
+    fullWidth: true,
+    variant: "outlined" as const,
+    sx: {
+        "& .MuiInputBase-root": {
+            minHeight: 56,
+            alignItems: "center",
+        },
+    },
+};
 
 export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
     const [open, setOpen] = useState(false);
@@ -131,11 +141,11 @@ export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
                         <Stack spacing={2} sx={{ pt: 1 }}>
                             {authError ? <Alert severity="error">{authError}</Alert> : null}
                             <TextField
+                                {...dialogFieldProps}
                                 label="请输入管理密码"
                                 type="password"
                                 value={passwordInput}
                                 onChange={(event) => setPasswordInput(event.target.value)}
-                                fullWidth
                                 autoFocus
                             />
                         </Stack>
@@ -173,6 +183,7 @@ export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
                             {error ? <Alert severity="error">{error}</Alert> : null}
 
                             <TextField
+                                {...dialogFieldProps}
                                 label="风机图片目录"
                                 value={formValues.windImageDir}
                                 onChange={(event) =>
@@ -181,11 +192,11 @@ export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
                                         windImageDir: event.target.value,
                                     }))
                                 }
-                                fullWidth
                                 helperText="例如：wind_result/map"
                             />
 
                             <TextField
+                                {...dialogFieldProps}
                                 label="光伏图片目录"
                                 value={formValues.solarImageDir}
                                 onChange={(event) =>
@@ -194,11 +205,11 @@ export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
                                         solarImageDir: event.target.value,
                                     }))
                                 }
-                                fullWidth
                                 helperText="例如：solar_result/map"
                             />
 
                             <TextField
+                                {...dialogFieldProps}
                                 label="数据文件名称"
                                 value={formValues.dataFileName}
                                 onChange={(event) =>
@@ -207,7 +218,6 @@ export default function SettingsDialog({ initialStatus }: SettingsDialogProps) {
                                         dataFileName: event.target.value,
                                     }))
                                 }
-                                fullWidth
                                 helperText="例如：project_store，实际保存为 assets/data/project_store.sqlite"
                             />
                         </Stack>
