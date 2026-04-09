@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
     Alert,
+    Autocomplete,
     Box,
     Button,
     Card,
@@ -121,6 +122,14 @@ const defaultPowerFieldForm: Omit<PowerFieldRow, "id"> = {
     group_name: "",
     confidence: 0.95,
 };
+
+const provinceOptions = [
+    "北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江",
+    "上海", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南",
+    "湖北", "湖南", "广东", "广西", "海南", "重庆", "四川", "贵州",
+    "云南", "西藏", "陕西", "甘肃", "青海", "宁夏", "新疆", "台湾",
+    "香港", "澳门",
+];
 
 function confidenceLabel(value: number) {
     return `${Math.round((value || 0) * 100)}%`;
@@ -857,19 +866,30 @@ function RecognitionSection(props: {
     onDeleteRow: (id: number) => void;
 }) {
     const templateType = props.title.includes("光伏") ? "solar-recognition" : "wind-recognition";
+    const selectedProvince = props.filters.province || null;
 
     return (
         <DataSectionCard title={props.title}>
             <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                <TextField
-                    label="省"
+                <Autocomplete
+                    options={provinceOptions}
                     size="small"
-                    sx={{ minWidth: 160, ...compactFieldSx }}
-                    value={props.filters.province}
-                    onChange={(event) => {
+                    sx={{ minWidth: 180 }}
+                    value={selectedProvince}
+                    onChange={(_, value) => {
                         props.setPage(0);
-                        props.setFilters((current) => ({ ...current, province: event.target.value }));
+                        props.setFilters((current) => ({
+                            ...current,
+                            province: value ?? "",
+                        }));
                     }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="省"
+                            sx={compactFieldSx}
+                        />
+                    )}
                 />
                 <FormControlLabel
                     control={
