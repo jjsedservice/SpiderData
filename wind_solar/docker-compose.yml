@@ -1,0 +1,19 @@
+services:
+  ws-scan:
+    platform: linux/amd64
+    image: ccr-3r1um3ce-pub.cnc.gz.baidubce.com/wp/ws-scan:v0.3.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws-scan
+    expose:
+      - 80
+    volumes:
+      - ./assets:/app/assets
+      - ./config.yaml:/app/config.yaml
+    networks:
+      - jjsed_apps_net
+    restart: always
+networks:
+  jjsed_apps_net:
+    external: true

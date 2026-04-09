@@ -25,6 +25,11 @@ type RecognitionRow = {
     image_exists: number;
 };
 
+type ManualAssociationRow = {
+    farm_id: number;
+    recognition_id: number;
+};
+
 type Point = {
     lng: number;
     lat: number;
@@ -149,6 +154,10 @@ async function enrichRecognition(type: EnergyType, row: RecognitionRow) {
     };
 }
 
+function uniqueById<T extends { id: number }>(items: T[]) {
+    return Array.from(new Map(items.map((item) => [item.id, item])).values());
+}
+
 export async function GET(request: Request) {
     try {
         const { db } = await getDatabase();
@@ -188,6 +197,7 @@ export async function GET(request: Request) {
         const enrichedRecognition = await Promise.all(
             recognitionRows.map((row) => enrichRecognition(type, row)),
         );
+        const recognitionById = new Map(enrichedRecognition.map((row) => [row.id, row]));
 
         const farmMap = new Map(
             farms.map((farm) => [
@@ -200,13 +210,14 @@ export async function GET(request: Request) {
                         RecognitionRow & {
                             image_url: string | null;
                             distance_km: number;
+                            association_source: "auto" | "manual";
                         }
                     >,
                 },
             ]),
         );
 
-        const outliers: Array<
+        let outliers: Array<
             RecognitionRow & {
                 image_url: string | null;
             }
@@ -240,13 +251,62 @@ export async function GET(request: Request) {
             farmMap.get(matchedFarmId)?.associated.push({
                 ...recognition,
                 distance_km: Number(nearestDistance.toFixed(3)),
+                association_source: "auto",
             });
         }
 
+        if (farmMap.size > 0) {
+            const manualAssociations = execRows<ManualAssociationRow>(
+                db,
+                `SELECT farm_id, recognition_id
+                 FROM manual_associations
+                 WHERE energy_type = '${type}'
+                   AND farm_id IN (${Array.from(farmMap.keys()).join(",")})`,
+            );
+
+            for (const manualAssociation of manualAssociations) {
+                const farm = farmMap.get(Number(manualAssociation.farm_id));
+                const recognition = recognitionById.get(Number(manualAssociation.recognition_id));
+                if (!farm || !recognition) {
+                    continue;
+                }
+
+                if (farm.associated.some((item) => item.id === recognition.id)) {
+                    continue;
+                }
+
+                const distance = distanceKm(
+                    {
+                        lng: Number(recognition.longitude),
+                        lat: Number(recognition.latitude),
+                    },
+                    {
+                        lng: farm.longitude,
+                        lat: farm.latitude,
+                    },
+                );
+
+                farm.associated.push({
+                    ...recognition,
+                    distance_km: Number(distance.toFixed(3)),
+                    association_source: "manual",
+                });
+            }
+        }
+
+        const associatedRecognitionIds = new Set<number>();
+        farmMap.forEach((farm) => {
+            farm.associated.forEach((item) => {
+                associatedRecognitionIds.add(item.id);
+            });
+        });
+        outliers = outliers.filter((item) => !associatedRecognitionIds.has(item.id));
+
         const farmsWithSummary = Array.from(farmMap.values()).map((farm) => {
+            const uniqueAssociated = uniqueById(farm.associated);
             const hullSeed = [
                 { lng: farm.longitude, lat: farm.latitude },
-                ...farm.associated.map((item) => ({
+                ...uniqueAssociated.map((item) => ({
                     lng: Number(item.longitude),
                     lat: Number(item.latitude),
                 })),
@@ -262,9 +322,9 @@ export async function GET(request: Request) {
                 province: farm.province,
                 longitude: farm.longitude,
                 latitude: farm.latitude,
-                associated_count: farm.associated.length,
+                associated_count: uniqueAssociated.length,
                 boundary: hullPoints,
-                preview_images: farm.associated
+                preview_images: uniqueAssociated
                     .filter((item) => item.image_url)
                     .slice(0, 8)
                     .map((item) => ({
@@ -272,8 +332,13 @@ export async function GET(request: Request) {
                         original_image: item.original_image,
                         image_url: item.image_url,
                     })),
-                associated: farm.associated,
+                associated: uniqueAssociated,
             };
+        });
+
+        const linkedRecognitionIds = new Set<number>();
+        farmsWithSummary.forEach((farm) => {
+            farm.associated.forEach((item) => linkedRecognitionIds.add(item.id));
         });
 
         return NextResponse.json({
@@ -282,7 +347,7 @@ export async function GET(request: Request) {
                 farm_count: farmsWithSummary.length,
                 linked_farm_count: farmsWithSummary.filter((farm) => farm.associated_count > 0).length,
                 recognition_count: enrichedRecognition.length,
-                linked_recognition_count: enrichedRecognition.length - outliers.length,
+                linked_recognition_count: linkedRecognitionIds.size,
                 outlier_count: outliers.length,
             },
             farms: farmsWithSummary,

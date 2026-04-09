@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
     Alert,
     Autocomplete,
@@ -214,6 +215,19 @@ export default function DataImportDashboard() {
         loading: false,
         error: null,
     });
+
+    const solarExportHref = `/api/recognition?${new URLSearchParams({
+        type: "solar",
+        province: solarFilters.province,
+        unlinkedOnly: String(solarFilters.unlinkedOnly),
+        format: "csv",
+    }).toString()}`;
+    const windExportHref = `/api/recognition?${new URLSearchParams({
+        type: "wind",
+        province: windFilters.province,
+        unlinkedOnly: String(windFilters.unlinkedOnly),
+        format: "csv",
+    }).toString()}`;
 
     useEffect(() => {
         void loadPowerFields();
@@ -696,6 +710,7 @@ export default function DataImportDashboard() {
                 setFilters={setSolarFilters}
                 error={solarError}
                 onImport={() => openImportDialog("solar-recognition")}
+                exportHref={solarExportHref}
                 onDeleteFiltered={() =>
                     confirmAction("删除当前光伏搜索结果", "将根据当前搜索条件删除光伏识别数据。", async () =>
                         deleteRecognitionBatch("solar", "filtered"),
@@ -723,6 +738,7 @@ export default function DataImportDashboard() {
                 setFilters={setWindFilters}
                 error={windError}
                 onImport={() => openImportDialog("wind-recognition")}
+                exportHref={windExportHref}
                 onDeleteFiltered={() =>
                     confirmAction("删除当前风电搜索结果", "将根据当前搜索条件删除风电识别数据。", async () =>
                         deleteRecognitionBatch("wind", "filtered"),
@@ -861,6 +877,7 @@ function RecognitionSection(props: {
     setFilters: Dispatch<SetStateAction<{ province: string; unlinkedOnly: boolean }>>;
     error: string | null;
     onImport: () => void;
+    exportHref: string;
     onDeleteFiltered: () => void;
     onDeleteAll: () => void;
     onDeleteRow: (id: number) => void;
@@ -925,6 +942,15 @@ function RecognitionSection(props: {
                     variant="text"
                 >
                     下载模板
+                </Button>
+                <Button
+                    size="small"
+                    component="a"
+                    href={props.exportHref}
+                    startIcon={<DownloadIcon />}
+                    variant="text"
+                >
+                    导出
                 </Button>
                 <Button size="small" startIcon={<CloudUploadIcon />} variant="outlined" onClick={props.onImport}>
                     导入

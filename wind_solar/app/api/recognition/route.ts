@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { escapeSql, execRows, getDatabase } from "@/lib/db";
 import { findRecognitionImage } from "@/lib/recognition-images";
 
+function toCsvValue(value: unknown) {
+    const text = String(value ?? "");
+    if (/[",\n]/.test(text)) {
+        return `"${text.replaceAll('"', '""')}"`;
+    }
+    return text;
+}
+
 function resolveTable(type: string | null) {
     if (type === "solar") {
         return "solar_recognition";
@@ -51,6 +59,7 @@ export async function GET(request: Request) {
         const pageSize = Number(searchParams.get("pageSize") ?? "10");
         const province = (searchParams.get("province") ?? "").trim();
         const unlinkedOnly = searchParams.get("unlinkedOnly") === "true";
+        const format = (searchParams.get("format") ?? "").trim();
 
         const clauses: string[] = [];
         const params: Record<string, unknown> = {};
@@ -72,6 +81,33 @@ export async function GET(request: Request) {
         const filteredRows = unlinkedOnly
             ? enrichedRows.filter((row) => !row.image_url)
             : enrichedRows;
+
+        if (format === "csv") {
+            const lines = [
+                ["原始图片", "省", "市", "经度", "纬度"].map(toCsvValue).join(","),
+                ...filteredRows.map((row) =>
+                    [
+                        row.original_image,
+                        row.province_name,
+                        row.city,
+                        row.longitude,
+                        row.latitude,
+                    ]
+                        .map(toCsvValue)
+                        .join(","),
+                ),
+            ];
+            const filePrefix = type === "solar" ? "光伏识别数据" : "风电识别数据";
+
+            return new Response(`\uFEFF${lines.join("\n")}`, {
+                status: 200,
+                headers: {
+                    "Content-Type": "text/csv; charset=utf-8",
+                    "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(`${filePrefix}_导出.csv`)}`,
+                },
+            });
+        }
+
         const pagedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
 
         return NextResponse.json({ ok: true, rows: pagedRows, total: filteredRows.length });

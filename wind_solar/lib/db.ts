@@ -71,6 +71,16 @@ function initializeSchema(db: SqlDatabase) {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS manual_associations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            energy_type TEXT NOT NULL,
+            farm_id INTEGER NOT NULL,
+            recognition_id INTEGER NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(energy_type, farm_id, recognition_id)
+        );
     `);
 
     const columns = db.exec("PRAGMA table_info(power_fields)");

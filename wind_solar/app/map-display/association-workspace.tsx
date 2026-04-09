@@ -1,6 +1,9 @@
 "use client";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
+import HighlightAltIcon from "@mui/icons-material/HighlightAlt";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
     Alert,
     Autocomplete,
@@ -47,6 +50,7 @@ type AssociatedRecognition = {
     latitude: string;
     image_url: string | null;
     distance_km: number;
+    association_source: "auto" | "manual";
 };
 
 type FarmPreview = {
@@ -154,8 +158,8 @@ const compactFieldSx = {
     },
 };
 
-async function fetchJson<T>(input: RequestInfo) {
-    const response = await fetch(input);
+async function fetchJson<T>(input: RequestInfo, init?: RequestInit) {
+    const response = await fetch(input, init);
     const payload = await response.json();
     if (!response.ok || payload.ok === false) {
         throw new Error(payload.message || "请求失败");
@@ -228,17 +232,42 @@ function createOutlierMarkerContent() {
     `;
 }
 
+function createOutlierCircle(item: OutlierPreview, isSelected: boolean) {
+    const lng = Number(item.longitude);
+    const lat = Number(item.latitude);
+
+    return new window.AMap.Circle({
+        center: [lng, lat],
+        radius: 150,
+        strokeColor: isSelected ? "#fb8c00" : "#64b5f6",
+        strokeWeight: 1,
+        strokeOpacity: 0.9,
+        fillColor: isSelected ? "#ffcc80" : "#bbdefb",
+        fillOpacity: 0.8,
+    });
+}
+
 export default function AssociationWorkspace() {
     const mapRef = useRef<HTMLDivElement | null>(null);
     const mapInstanceRef = useRef<any>(null);
     const countryLayerRef = useRef<any>(null);
     const overlaysRef = useRef<any[]>([]);
+    const previewRef = useRef<AssociationPreview | null>(null);
+    const lastRenderedFarmIdRef = useRef<number | null>(null);
+    const drawingPathRef = useRef<[number, number][]>([]);
+    const isPointerDrawingRef = useRef(false);
+    const selectionOverlayRef = useRef<any>(null);
 
     const [scriptReady, setScriptReady] = useState(false);
     const [canLoadMapScript, setCanLoadMapScript] = useState(false);
     const [preview, setPreview] = useState<AssociationPreview | null>(null);
     const [provinceBoundary, setProvinceBoundary] = useState<ProvinceBoundary | null>(null);
     const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
+    const [selectingOutliers, setSelectingOutliers] = useState(false);
+    const [selectedOutlierIds, setSelectedOutlierIds] = useState<number[]>([]);
+    const [pendingManualOutlierIds, setPendingManualOutlierIds] = useState<number[]>([]);
+    const [savingManualAssociations, setSavingManualAssociations] = useState(false);
+    const [deletingManualAssociationId, setDeletingManualAssociationId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hoverPreview, setHoverPreview] = useState<{
@@ -249,6 +278,7 @@ export default function AssociationWorkspace() {
         alignRight: boolean;
         alignBottom: boolean;
     } | null>(null);
+    const [drawingPixels, setDrawingPixels] = useState<Array<{ x: number; y: number }>>([]);
     const [filters, setFilters] = useState({
         type: "wind" as EnergyType,
         radiusKm: "10",
@@ -263,6 +293,37 @@ export default function AssociationWorkspace() {
         () => preview?.farms.find((farm) => farm.id === selectedFarmId) ?? null,
         [preview, selectedFarmId],
     );
+    const selectedOutliers = useMemo(
+        () =>
+            (preview?.outliers ?? []).filter((item) => selectedOutlierIds.includes(item.id)),
+        [preview, selectedOutlierIds],
+    );
+    const pendingManualOutliers = useMemo(
+        () =>
+            (preview?.outliers ?? []).filter((item) => pendingManualOutlierIds.includes(item.id)),
+        [preview, pendingManualOutlierIds],
+    );
+    const autoAssociated = useMemo(
+        () => selectedFarm?.associated.filter((item) => item.association_source === "auto") ?? [],
+        [selectedFarm],
+    );
+    const manualAssociated = useMemo(
+        () => selectedFarm?.associated.filter((item) => item.association_source === "manual") ?? [],
+        [selectedFarm],
+    );
+    const mergedManualAssociated = useMemo(
+        () =>
+            Array.from(
+                new Map(
+                    [...manualAssociated, ...pendingManualOutliers].map((item) => [item.id, item]),
+                ).values(),
+            ),
+        [manualAssociated, pendingManualOutliers],
+    );
+
+    useEffect(() => {
+        previewRef.current = preview;
+    }, [preview]);
 
     useEffect(() => {
         window._AMapSecurityConfig = {
@@ -309,6 +370,7 @@ export default function AssociationWorkspace() {
             countryLayer.setMap?.(map);
             countryLayerRef.current = countryLayer;
         }
+
     }, [scriptReady]);
 
     useEffect(() => {
@@ -329,10 +391,142 @@ export default function AssociationWorkspace() {
         if (!mapInstanceRef.current || !preview) {
             return;
         }
-        renderMap();
-    }, [preview, provinceBoundary, selectedFarmId]);
 
-    async function loadPreview() {
+        const preserveViewport =
+            selectedFarmId !== null &&
+            lastRenderedFarmIdRef.current === selectedFarmId;
+
+        renderMap(preserveViewport);
+        lastRenderedFarmIdRef.current = selectedFarmId;
+    }, [preview, provinceBoundary, selectedFarmId, pendingManualOutlierIds, selectedOutlierIds]);
+
+    useEffect(() => {
+        if (!selectedFarmId) {
+            setSelectedOutlierIds([]);
+            setPendingManualOutlierIds([]);
+            setSelectingOutliers(false);
+            clearSelectionArtifacts();
+        }
+    }, [selectedFarmId]);
+
+    function clearSelectionArtifacts() {
+        selectionOverlayRef.current?.setMap?.(null);
+        selectionOverlayRef.current = null;
+        drawingPathRef.current = [];
+        isPointerDrawingRef.current = false;
+        setDrawingPixels([]);
+    }
+
+    function getPointerData(clientX: number, clientY: number) {
+        const map = mapInstanceRef.current;
+        const container = mapRef.current;
+        if (!map || !container || !window.AMap) {
+            return null;
+        }
+
+        const rect = container.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const lngLat = map.containerToLngLat(new window.AMap.Pixel(x, y));
+        if (!lngLat) {
+            return null;
+        }
+
+        return {
+            x,
+            y,
+            lng: Number(lngLat.lng ?? lngLat.getLng?.()),
+            lat: Number(lngLat.lat ?? lngLat.getLat?.()),
+        };
+    }
+
+    function finishFreehandSelection() {
+        const map = mapInstanceRef.current;
+        if (!map || !isPointerDrawingRef.current) {
+            return;
+        }
+
+        isPointerDrawingRef.current = false;
+        map.setStatus?.({ dragEnable: true });
+
+        if (drawingPathRef.current.length < 3) {
+            clearSelectionArtifacts();
+            setSelectingOutliers(false);
+            return;
+        }
+
+        const polygonPoints = [...drawingPathRef.current];
+        selectionOverlayRef.current?.setMap?.(null);
+        const polygon = new window.AMap.Polygon({
+            path: polygonPoints,
+            strokeColor: "#1565c0",
+            strokeOpacity: 0.95,
+            strokeWeight: 2,
+            fillColor: "#90caf9",
+            fillOpacity: 0.18,
+            zIndex: 19,
+        });
+        polygon.setMap(map);
+        overlaysRef.current.push(polygon);
+        selectionOverlayRef.current = polygon;
+
+        const nextSelectedIds = (previewRef.current?.outliers ?? [])
+            .filter((item) =>
+                pointInPolygon(
+                    [Number(item.longitude), Number(item.latitude)],
+                    polygonPoints,
+                ),
+            )
+            .map((item) => item.id);
+
+        drawingPathRef.current = [];
+        setDrawingPixels([]);
+        setSelectedOutlierIds(nextSelectedIds);
+        setSelectingOutliers(false);
+    }
+
+    function handleBrushPointerDown(event: any) {
+        if (!selectingOutliers) {
+            return;
+        }
+
+        const pointerData = getPointerData(event.clientX, event.clientY);
+        if (!pointerData) {
+            return;
+        }
+
+        selectionOverlayRef.current?.setMap?.(null);
+        selectionOverlayRef.current = null;
+        setSelectedOutlierIds([]);
+        event.currentTarget.setPointerCapture(event.pointerId);
+        mapInstanceRef.current?.setStatus?.({ dragEnable: false });
+        isPointerDrawingRef.current = true;
+        drawingPathRef.current = [[pointerData.lng, pointerData.lat]];
+        setDrawingPixels([{ x: pointerData.x, y: pointerData.y }]);
+    }
+
+    function handleBrushPointerMove(event: any) {
+        if (!selectingOutliers || !isPointerDrawingRef.current) {
+            return;
+        }
+
+        const pointerData = getPointerData(event.clientX, event.clientY);
+        if (!pointerData) {
+            return;
+        }
+
+        drawingPathRef.current.push([pointerData.lng, pointerData.lat]);
+        setDrawingPixels((current) => [...current, { x: pointerData.x, y: pointerData.y }]);
+    }
+
+    function handleBrushPointerUp(event: any) {
+        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        finishFreehandSelection();
+    }
+
+    async function loadPreview(nextSelectedFarmId?: number | null) {
         setLoading(true);
         setError(null);
         try {
@@ -349,7 +543,7 @@ export default function AssociationWorkspace() {
                 farms: payload.farms,
                 outliers: payload.outliers,
             });
-            setSelectedFarmId(null);
+            setSelectedFarmId(nextSelectedFarmId ?? null);
         } catch (loadError) {
             setError(loadError instanceof Error ? loadError.message : "加载失败");
         } finally {
@@ -411,10 +605,130 @@ export default function AssociationWorkspace() {
         }
     }
 
+    function attachSelectedOutliers() {
+        if (!selectedOutlierIds.length) {
+            return;
+        }
+
+        setPendingManualOutlierIds((current) =>
+            Array.from(new Set([...current, ...selectedOutlierIds])),
+        );
+        setSelectedOutlierIds([]);
+        setSelectingOutliers(false);
+        clearSelectionArtifacts();
+        mapInstanceRef.current?.setStatus?.({ dragEnable: true });
+    }
+
+    function cancelSelectedOutliers() {
+        setSelectedOutlierIds([]);
+        setSelectingOutliers(false);
+        clearSelectionArtifacts();
+        mapInstanceRef.current?.setStatus?.({ dragEnable: true });
+    }
+
+    async function saveManualAssociations() {
+        if (!selectedFarmId || !pendingManualOutlierIds.length) {
+            return;
+        }
+
+        setSavingManualAssociations(true);
+        setError(null);
+        try {
+            await fetchJson<{ ok: true }>("/api/association/manual", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    type: filters.type,
+                    farmId: selectedFarmId,
+                    recognitionIds: pendingManualOutlierIds,
+                }),
+            });
+            setPendingManualOutlierIds([]);
+            await loadPreview(selectedFarmId);
+        } catch (saveError) {
+            setError(saveError instanceof Error ? saveError.message : "保存附加关联失败");
+        } finally {
+            setSavingManualAssociations(false);
+        }
+    }
+
+    async function removeManualAssociation(recognitionId: number) {
+        if (!selectedFarmId) {
+            return;
+        }
+
+        if (pendingManualOutlierIds.includes(recognitionId)) {
+            setPendingManualOutlierIds((current) => current.filter((item) => item !== recognitionId));
+            return;
+        }
+
+        setDeletingManualAssociationId(recognitionId);
+        setError(null);
+        try {
+            await fetchJson<{ ok: true }>("/api/association/manual", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    type: filters.type,
+                    farmId: selectedFarmId,
+                    recognitionId,
+                }),
+            });
+            await loadPreview(selectedFarmId);
+        } catch (deleteError) {
+            setError(deleteError instanceof Error ? deleteError.message : "删除附加关联失败");
+        } finally {
+            setDeletingManualAssociationId(null);
+        }
+    }
+
+    async function removeAllManualAssociations() {
+        if (!selectedFarmId || !mergedManualAssociated.length) {
+            return;
+        }
+
+        const pendingIds = pendingManualOutlierIds;
+        const savedIds = manualAssociated.map((item) => item.id);
+
+        if (pendingIds.length) {
+            setPendingManualOutlierIds([]);
+        }
+
+        if (!savedIds.length) {
+            return;
+        }
+
+        setDeletingManualAssociationId(-1);
+        setError(null);
+        try {
+            await fetchJson<{ ok: true }>("/api/association/manual", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    type: filters.type,
+                    farmId: selectedFarmId,
+                    recognitionIds: savedIds,
+                }),
+            });
+            await loadPreview(selectedFarmId);
+        } catch (deleteError) {
+            setError(deleteError instanceof Error ? deleteError.message : "删除全部附加关联失败");
+        } finally {
+            setDeletingManualAssociationId(null);
+        }
+    }
+
     function clearMapOverlays() {
         setHoverPreview(null);
         overlaysRef.current.forEach((overlay) => overlay.setMap?.(null));
         overlaysRef.current = [];
+        selectionOverlayRef.current = null;
     }
 
     function addOverlay(overlay: any) {
@@ -477,10 +791,20 @@ export default function AssociationWorkspace() {
     function createOutlierMarker(item: OutlierPreview) {
         const lng = Number(item.longitude);
         const lat = Number(item.latitude);
+        const isSelected = selectedOutlierIds.includes(item.id);
         const marker = new window.AMap.Marker({
             position: [lng, lat],
             anchor: "center",
-            content: createOutlierMarkerContent(),
+            content: `
+                <div style="
+                    width:10px;
+                    height:10px;
+                    border-radius:50%;
+                    background:${isSelected ? "#ff9800" : "#64b5f6"};
+                    border:1px solid rgba(255,255,255,0.9);
+                    box-shadow:0 4px 10px rgba(100,181,246,0.28);
+                "></div>
+            `,
         });
 
         if (item.image_url) {
@@ -496,6 +820,26 @@ export default function AssociationWorkspace() {
         }
 
         return marker;
+    }
+
+    function pointInPolygon(point: [number, number], polygon: [number, number][]) {
+        if (polygon.length < 3) {
+            return false;
+        }
+
+        let inside = false;
+        const [x, y] = point;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const [xi, yi] = polygon[i];
+            const [xj, yj] = polygon[j];
+            const intersect =
+                yi > y !== yj > y &&
+                x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi;
+            if (intersect) {
+                inside = !inside;
+            }
+        }
+        return inside;
     }
 
     function renderProvinceOutline() {
@@ -564,11 +908,15 @@ export default function AssociationWorkspace() {
         });
     }
 
-    function renderFarmDetailMap(farm: FarmPreview) {
+    function renderFarmDetailMap(farm: FarmPreview, preserveViewport = false) {
         const map = mapInstanceRef.current;
         if (!map) {
             return;
         }
+        const pendingManualSet = new Set(pendingManualOutlierIds);
+        const pendingManualItems = (preview?.outliers ?? []).filter((item) =>
+            pendingManualSet.has(item.id),
+        );
 
         renderProvinceOutline();
 
@@ -598,6 +946,19 @@ export default function AssociationWorkspace() {
             addOverlay(marker);
             fitItems.push(marker);
         });
+        pendingManualItems.forEach((item) => {
+            const marker = createRecognitionMarker({
+                id: item.id,
+                original_image: item.original_image,
+                longitude: item.longitude,
+                latitude: item.latitude,
+                image_url: item.image_url,
+                distance_km: 0,
+                association_source: "manual",
+            });
+            addOverlay(marker);
+            fitItems.push(marker);
+        });
 
         if (farm.boundary.length >= 3) {
             const polygon = new window.AMap.Polygon({
@@ -612,29 +973,45 @@ export default function AssociationWorkspace() {
             fitItems.push(polygon);
         }
 
-        if (fitItems.length) {
+        if (!preserveViewport && fitItems.length) {
             map.setFitView(fitItems, false, [60, 60, 60, 60], 11);
         }
-        map.setCenter([farm.longitude, farm.latitude]);
-        map.setZoom(11);
+        if (!preserveViewport) {
+            map.setCenter([farm.longitude, farm.latitude]);
+            map.setZoom(11);
+        }
 
         const bounds = map.getBounds?.();
         preview?.outliers.forEach((item) => {
+            if (pendingManualSet.has(item.id)) {
+                return;
+            }
             const lng = Number(item.longitude);
             const lat = Number(item.latitude);
             const isVisible = bounds?.contains?.([lng, lat]) ?? true;
             if (!isVisible) {
                 return;
             }
-            const marker = createOutlierMarker(item);
-            addOverlay(marker);
+            const circle = createOutlierCircle(item, selectedOutlierIds.includes(item.id));
+            if (item.image_url) {
+                circle.on("mouseover", () => {
+                    updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+                });
+                circle.on("mousemove", () => {
+                    updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+                });
+                circle.on("mouseout", () => {
+                    setHoverPreview(null);
+                });
+            }
+            addOverlay(circle);
         });
     }
 
-    function renderMap() {
+    function renderMap(preserveViewport = false) {
         clearMapOverlays();
         if (selectedFarm) {
-            renderFarmDetailMap(selectedFarm);
+            renderFarmDetailMap(selectedFarm, preserveViewport);
             return;
         }
         renderOverviewMap();
@@ -749,9 +1126,6 @@ export default function AssociationWorkspace() {
                                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                                     <Chip label={`当前场站: ${selectedFarm.site_name || selectedFarm.enterprise_name}`} color="primary" />
                                     <Chip label={`已关联 ${selectedFarm.associated_count} 个识别点`} />
-                                    <Button size="small" onClick={() => setSelectedFarmId(null)}>
-                                        返回总览
-                                    </Button>
                                 </Stack>
                             ) : null}
 
@@ -772,6 +1146,43 @@ export default function AssociationWorkspace() {
                                     backgroundColor: "#dfe8de",
                                 }}
                             />
+                            {selectedFarm && selectingOutliers ? (
+                                <Box
+                                    onPointerDown={handleBrushPointerDown}
+                                    onPointerMove={handleBrushPointerMove}
+                                    onPointerUp={handleBrushPointerUp}
+                                    onPointerLeave={handleBrushPointerUp}
+                                    sx={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        zIndex: 5,
+                                        cursor: "crosshair",
+                                        touchAction: "none",
+                                    }}
+                                >
+                                    <Box
+                                        component="svg"
+                                        viewBox={`0 0 ${mapRef.current?.clientWidth ?? 1} ${mapRef.current?.clientHeight ?? 1}`}
+                                        preserveAspectRatio="none"
+                                        sx={{
+                                            width: "100%",
+                                            height: "100%",
+                                            overflow: "visible",
+                                        }}
+                                    >
+                                        {drawingPixels.length >= 2 ? (
+                                            <polyline
+                                                points={drawingPixels.map((point) => `${point.x},${point.y}`).join(" ")}
+                                                fill="none"
+                                                stroke="#1565c0"
+                                                strokeWidth="2.5"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                        ) : null}
+                                    </Box>
+                                </Box>
+                            ) : null}
                             <Box
                                 sx={{
                                     position: "absolute",
@@ -787,9 +1198,6 @@ export default function AssociationWorkspace() {
                                 }}
                             >
                                 <Stack direction="row" spacing={2} alignItems="center">
-                                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#163c2f" }}>
-                                        图例
-                                    </Typography>
                                     <Stack direction="row" spacing={1} alignItems="center">
                                         <Box
                                             component="img"
@@ -822,11 +1230,103 @@ export default function AssociationWorkspace() {
                                             }}
                                         />
                                         <Typography variant="body2" color="text.secondary">
-                                            零星（可悬停查看）
+                                            {selectedFarm ? "零星（可悬停查看）" : "零星"}
                                         </Typography>
                                     </Stack>
+                                    {selectedFarm ? (
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <Typography variant="body2" color="text.secondary">
+                                                已圈选 {selectedOutlierIds.length} 个零星
+                                            </Typography>
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                onClick={attachSelectedOutliers}
+                                                sx={{
+                                                    minWidth: 0,
+                                                    px: 1.25,
+                                                    height: 28,
+                                                    borderRadius: 1.5,
+                                                    display: selectedOutlierIds.length ? "inline-flex" : "none",
+                                                }}
+                                            >
+                                                关联
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={cancelSelectedOutliers}
+                                                sx={{
+                                                    minWidth: 0,
+                                                    px: 1.25,
+                                                    height: 28,
+                                                    borderRadius: 1.5,
+                                                    display: selectedOutlierIds.length ? "inline-flex" : "none",
+                                                }}
+                                            >
+                                                取消
+                                            </Button>
+                                        </Stack>
+                                    ) : null}
                                 </Stack>
                             </Box>
+                            {selectedFarm ? (
+                                <Box
+                                    sx={{
+                                        position: "absolute",
+                                        top: 16,
+                                        right: 16,
+                                        zIndex: 6,
+                                    }}
+                                >
+                                    <Stack spacing={1.25} alignItems="stretch">
+                                        <Button
+                                            size="small"
+                                            variant={selectingOutliers ? "contained" : "outlined"}
+                                            startIcon={<HighlightAltIcon sx={{ fontSize: 16 }} />}
+                                            onClick={() => {
+                                                if (selectingOutliers) {
+                                                    cancelSelectedOutliers();
+                                                    return;
+                                                }
+                                                clearSelectionArtifacts();
+                                                setSelectedOutlierIds([]);
+                                                setSelectingOutliers(true);
+                                            }}
+                                            sx={{
+                                                minWidth: 0,
+                                                px: 1.5,
+                                                height: 36,
+                                                borderRadius: 2,
+                                                backgroundColor: selectingOutliers ? "#1565c0" : "rgba(255,255,255,0.94)",
+                                                color: selectingOutliers ? "#fff" : "#163c2f",
+                                                borderColor: "rgba(15, 61, 46, 0.12)",
+                                                boxShadow: "0 10px 24px rgba(15, 61, 46, 0.12)",
+                                            }}
+                                        >
+                                            {selectingOutliers ? "结束圈选" : "圈选零星"}
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            startIcon={<ArrowBackIcon sx={{ fontSize: 16 }} />}
+                                            onClick={() => setSelectedFarmId(null)}
+                                            sx={{
+                                                minWidth: 0,
+                                                px: 1.5,
+                                                height: 36,
+                                                borderRadius: 2,
+                                                backgroundColor: "rgba(255,255,255,0.94)",
+                                                color: "#163c2f",
+                                                borderColor: "rgba(15, 61, 46, 0.12)",
+                                                boxShadow: "0 10px 24px rgba(15, 61, 46, 0.12)",
+                                            }}
+                                        >
+                                            返回总览
+                                        </Button>
+                                    </Stack>
+                                </Box>
+                            ) : null}
                             {hoverPreview ? (
                                 <Box
                                     sx={{
@@ -872,41 +1372,133 @@ export default function AssociationWorkspace() {
                     <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid rgba(16, 74, 54, 0.1)" }}>
                         <CardContent sx={{ p: 3 }}>
                             <Stack spacing={2}>
-                                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                                    {selectedFarm.site_name || selectedFarm.enterprise_name}
-                                </Typography>
+                                <Stack
+                                    direction={{ xs: "column", md: "row" }}
+                                    justifyContent="space-between"
+                                    spacing={1.5}
+                                    alignItems={{ xs: "flex-start", md: "center" }}
+                                >
+                                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                                        {selectedFarm.site_name || selectedFarm.enterprise_name}
+                                    </Typography>
+                                </Stack>
                                 <Typography color="text.secondary">
                                     企业名称：{selectedFarm.enterprise_name} | 发电类型：{selectedFarm.power_type} | 装机容量：{selectedFarm.capacity || "无"}
                                 </Typography>
                                 <Typography color="text.secondary">
                                     省份：{selectedFarm.province || "无"} | 已关联识别点：{selectedFarm.associated_count}
                                 </Typography>
-                                <Grid container spacing={2}>
-                                    {selectedFarm.associated.filter((item) => item.image_url).length ? (
-                                        selectedFarm.associated
-                                            .filter((item) => item.image_url)
-                                            .map((item) => (
-                                                <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
-                                                    <Box
-                                                        component="img"
-                                                        src={item.image_url!}
-                                                        alt={item.original_image}
-                                                        sx={{
-                                                            width: "100%",
-                                                            aspectRatio: "1 / 1",
-                                                            objectFit: "cover",
-                                                            borderRadius: 2,
-                                                            border: "1px solid rgba(0,0,0,0.08)",
-                                                        }}
-                                                    />
-                                                </Grid>
-                                            ))
-                                    ) : (
-                                        <Grid size={12}>
-                                            <Typography color="text.secondary">该场站暂无可预览图片。</Typography>
-                                        </Grid>
-                                    )}
-                                </Grid>
+                                <Stack spacing={1.5}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                        范围内关联
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        {autoAssociated.filter((item) => item.image_url).length ? (
+                                            autoAssociated
+                                                .filter((item) => item.image_url)
+                                                .map((item) => (
+                                                    <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
+                                                        <Box
+                                                            component="img"
+                                                            src={item.image_url!}
+                                                            alt={item.original_image}
+                                                            sx={{
+                                                                width: "100%",
+                                                                aspectRatio: "1 / 1",
+                                                                objectFit: "cover",
+                                                                borderRadius: 2,
+                                                                border: "1px solid rgba(0,0,0,0.08)",
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                ))
+                                        ) : (
+                                            <Grid size={12}>
+                                                <Typography color="text.secondary">当前范围内暂无可预览图片。</Typography>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Stack>
+                                <Stack spacing={1.5}>
+                                    <Stack
+                                        direction={{ xs: "column", md: "row" }}
+                                        justifyContent="space-between"
+                                        spacing={1.5}
+                                        alignItems={{ xs: "flex-start", md: "center" }}
+                                    >
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                            附加关联
+                                        </Typography>
+                                        <Stack direction="row" spacing={1}>
+                                            <Button
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() => void removeAllManualAssociations()}
+                                                disabled={!mergedManualAssociated.length || deletingManualAssociationId !== null}
+                                            >
+                                                删除全部附加关联
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => void saveManualAssociations()}
+                                                disabled={!pendingManualOutliers.length || savingManualAssociations}
+                                            >
+                                                保存附加关联
+                                            </Button>
+                                        </Stack>
+                                    </Stack>
+                                    <Grid container spacing={2}>
+                                        {mergedManualAssociated.filter((item) => item.image_url).length ? (
+                                            mergedManualAssociated
+                                                .filter((item) => item.image_url)
+                                                .map((item) => (
+                                                    <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
+                                                        <Box sx={{ position: "relative" }}>
+                                                            <Box
+                                                                component="img"
+                                                                src={item.image_url!}
+                                                                alt={item.original_image}
+                                                                sx={{
+                                                                    width: "100%",
+                                                                    aspectRatio: "1 / 1",
+                                                                    objectFit: "cover",
+                                                                    borderRadius: 2,
+                                                                    border: "1px solid rgba(0,0,0,0.08)",
+                                                                }}
+                                                            />
+                                                            <Button
+                                                                size="small"
+                                                                onClick={() => void removeManualAssociation(item.id)}
+                                                                disabled={deletingManualAssociationId === item.id}
+                                                                sx={{
+                                                                    position: "absolute",
+                                                                    top: 8,
+                                                                    right: 8,
+                                                                    minWidth: 0,
+                                                                    width: 30,
+                                                                    height: 30,
+                                                                    borderRadius: "50%",
+                                                                    p: 0,
+                                                                    backgroundColor: "rgba(255,255,255,0.92)",
+                                                                    color: "#c62828",
+                                                                    boxShadow: "0 4px 12px rgba(0,0,0,0.16)",
+                                                                    "&:hover": {
+                                                                        backgroundColor: "#fff5f5",
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                                                            </Button>
+                                                        </Box>
+                                                    </Grid>
+                                                ))
+                                        ) : (
+                                            <Grid size={12}>
+                                                <Typography color="text.secondary">当前没有附加关联图片。</Typography>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Stack>
                             </Stack>
                         </CardContent>
                     </Card>
