@@ -3,6 +3,7 @@
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {
     Alert,
+    Autocomplete,
     Box,
     Button,
     Card,
@@ -19,7 +20,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 declare global {
     interface Window {
-        T?: any;
+        AMap?: any;
+        _AMapSecurityConfig?: {
+            securityJsCode?: string;
+        };
     }
 }
 
@@ -82,15 +86,12 @@ type AssociationPreview = {
 
 type ProvinceBoundary = {
     rings: BoundaryPoint[][];
-    bounds: {
-        minLng: number;
-        maxLng: number;
-        minLat: number;
-        maxLat: number;
-    } | null;
+    bounds: [number, number, number, number] | null;
 };
 
-const tianMapKey = "2d907290b8d600785e0d00bf624fd320";
+const amapKey = "3c2b3317bd1fd82708d2298085255cd5";
+const amapSecurityJsCode = "f91884f9854e1876e7062f294ab42185";
+
 const emptyPreview: AssociationPreview = {
     summary: {
         farm_count: 0,
@@ -162,16 +163,69 @@ async function fetchJson<T>(input: RequestInfo) {
     return payload as T;
 }
 
+function createFarmLabel(text: string) {
+    return `
+        <div style="
+            padding: 4px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(15,61,46,0.16);
+            background: rgba(255,255,255,0.92);
+            color: #0f3d2e;
+            font-size: 12px;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 6px 18px rgba(15,61,46,0.08);
+        ">${text}</div>
+    `;
+}
+
+function createFarmMarkerContent(color: string) {
+    return `
+        <div style="width:24px;height:34px;">
+            <svg width="24" height="34" viewBox="0 0 24 34" xmlns="http://www.w3.org/2000/svg">
+                <path fill="${color}" d="M12 0C5.372 0 0 5.372 0 12c0 8.6 12 22 12 22s12-13.4 12-22C24 5.372 18.628 0 12 0z"/>
+                <circle cx="12" cy="12" r="5" fill="#ffffff"/>
+            </svg>
+        </div>
+    `;
+}
+
+function createLegendMarkerDataUri(color: string) {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="34" viewBox="0 0 24 34">
+            <path fill="${color}" d="M12 0C5.372 0 0 5.372 0 12c0 8.6 12 22 12 22s12-13.4 12-22C24 5.372 18.628 0 12 0z"/>
+            <circle cx="12" cy="12" r="5" fill="#ffffff"/>
+        </svg>
+    `)}`;
+}
+
+function createImageMarkerContent(imageUrl: string) {
+    return `
+        <div style="
+            width:24px;
+            height:24px;
+            border-radius:6px;
+            overflow:hidden;
+            box-shadow:0 6px 14px rgba(15,61,46,0.16);
+            border:1px solid rgba(255,255,255,0.9);
+            background:#ffffff;
+        ">
+            <img src="${imageUrl}" alt="" style="display:block;width:100%;height:100%;object-fit:cover;" />
+        </div>
+    `;
+}
+
 export default function AssociationWorkspace() {
     const mapRef = useRef<HTMLDivElement | null>(null);
     const mapInstanceRef = useRef<any>(null);
+    const countryLayerRef = useRef<any>(null);
     const overlaysRef = useRef<any[]>([]);
 
     const [scriptReady, setScriptReady] = useState(false);
+    const [canLoadMapScript, setCanLoadMapScript] = useState(false);
     const [preview, setPreview] = useState<AssociationPreview | null>(null);
     const [provinceBoundary, setProvinceBoundary] = useState<ProvinceBoundary | null>(null);
     const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
-    const [provinceMaskPath, setProvinceMaskPath] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hoverPreview, setHoverPreview] = useState<{
@@ -187,40 +241,61 @@ export default function AssociationWorkspace() {
         radiusKm: "10",
         province: "云南",
     });
+
+    const selectedProvince =
+        provinces.find((province) => province.name === filters.province) ?? null;
     const summary = preview?.summary ?? emptyPreview.summary;
     const radiusMeters = Math.max(Number(filters.radiusKm) || 10, 0.1) * 1000;
-
     const selectedFarm = useMemo(
         () => preview?.farms.find((farm) => farm.id === selectedFarmId) ?? null,
         [preview, selectedFarmId],
     );
 
     useEffect(() => {
-        if (window.T) {
-            setScriptReady(true);
-        }
+        window._AMapSecurityConfig = {
+            securityJsCode: amapSecurityJsCode,
+        };
+        setCanLoadMapScript(true);
     }, []);
 
     useEffect(() => {
-        if (!scriptReady || !mapRef.current || mapInstanceRef.current || !window.T) {
+        if (window.AMap) {
+            setScriptReady(true);
+        }
+    }, [canLoadMapScript]);
+
+    useEffect(() => {
+        if (!scriptReady || !mapRef.current || mapInstanceRef.current || !window.AMap) {
             return;
         }
 
-        const map = new window.T.Map(mapRef.current);
-        map.centerAndZoom(new window.T.LngLat(102.7, 25.0), 7);
-        map.enableScrollWheelZoom();
+        const map = new window.AMap.Map(mapRef.current, {
+            zoom: 6,
+            center: [104.0, 35.5],
+            mapStyle: "amap://styles/normal",
+            viewMode: "2D",
+            resizeEnable: true,
+        });
         mapInstanceRef.current = map;
-        const syncMask = () => {
-            updateProvinceMaskPath();
-        };
-        map.addEventListener?.("moveend", syncMask);
-        map.addEventListener?.("zoomend", syncMask);
-        map.addEventListener?.("resize", syncMask);
 
-        setTimeout(() => {
-            map.checkResize?.();
-            syncMask();
-        }, 0);
+        if (window.AMap.DistrictLayer?.Country) {
+            const countryLayer = new window.AMap.DistrictLayer.Country({
+                zIndex: 8,
+                SOC: "CHN",
+                depth: 1,
+                styles: {
+                    fill: "transparent",
+                    "province-stroke": "rgba(0,0,0,0)",
+                    "city-stroke": "rgba(0,0,0,0)",
+                    "county-stroke": "rgba(0,0,0,0)",
+                    "nation-stroke": "#d32f2f",
+                    "coastline-stroke": "#d32f2f",
+                    "stroke-width": 2.2,
+                },
+            });
+            countryLayer.setMap?.(map);
+            countryLayerRef.current = countryLayer;
+        }
     }, [scriptReady]);
 
     useEffect(() => {
@@ -231,20 +306,18 @@ export default function AssociationWorkspace() {
     }, [scriptReady, filters]);
 
     useEffect(() => {
+        if (!scriptReady) {
+            return;
+        }
         void loadProvinceBoundary(filters.province);
-    }, [filters.province]);
+    }, [scriptReady, filters.province]);
 
     useEffect(() => {
         if (!mapInstanceRef.current || !preview) {
             return;
         }
-
         renderMap();
-    }, [preview, selectedFarmId]);
-
-    useEffect(() => {
-        updateProvinceMaskPath();
-    }, [provinceBoundary, selectedFarmId]);
+    }, [preview, provinceBoundary, selectedFarmId]);
 
     async function loadPreview() {
         setLoading(true);
@@ -279,7 +352,7 @@ export default function AssociationWorkspace() {
         }
 
         try {
-            const response = await fetch(`https://geo.datav.aliyun.com/areas_v3/bound/${adcode}_full.json`);
+            const response = await fetch(`https://geo.datav.aliyun.com/areas_v3/bound/${adcode}.json`);
             const payload = await response.json();
             const rings: BoundaryPoint[][] = [];
 
@@ -313,113 +386,99 @@ export default function AssociationWorkspace() {
 
             setProvinceBoundary({
                 rings,
-                bounds: {
-                    minLng: Math.min(...allPoints.map((point) => point.lng)),
-                    maxLng: Math.max(...allPoints.map((point) => point.lng)),
-                    minLat: Math.min(...allPoints.map((point) => point.lat)),
-                    maxLat: Math.max(...allPoints.map((point) => point.lat)),
-                },
+                bounds: [
+                    Math.min(...allPoints.map((point) => point.lng)),
+                    Math.min(...allPoints.map((point) => point.lat)),
+                    Math.max(...allPoints.map((point) => point.lng)),
+                    Math.max(...allPoints.map((point) => point.lat)),
+                ],
             });
         } catch {
             setProvinceBoundary(null);
         }
     }
 
-    function updateProvinceMaskPath() {
-        const map = mapInstanceRef.current;
-        const container = mapRef.current;
-        if (!map || !container || !provinceBoundary?.rings.length || selectedFarmId !== null) {
-            setProvinceMaskPath("");
-            return;
-        }
-
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        if (!width || !height) {
-            setProvinceMaskPath("");
-            return;
-        }
-
-        const ringPaths = provinceBoundary.rings
-            .map((ring) => {
-                const points = ring
-                    .map((point) => map.lngLatToContainerPoint?.(new window.T.LngLat(point.lng, point.lat)))
-                    .filter((point: any) => typeof point?.x === "number" && typeof point?.y === "number");
-
-                if (points.length < 3) {
-                    return "";
-                }
-
-                const [first, ...rest] = points;
-                return `M ${first.x} ${first.y} ${rest.map((point: any) => `L ${point.x} ${point.y}`).join(" ")} Z`;
-            })
-            .filter(Boolean)
-            .join(" ");
-
-        if (!ringPaths) {
-            setProvinceMaskPath("");
-            return;
-        }
-
-        setProvinceMaskPath(`M 0 0 H ${width} V ${height} H 0 Z ${ringPaths}`);
-    }
-
     function clearMapOverlays() {
-        const map = mapInstanceRef.current;
-        if (!map) {
-            return;
-        }
         setHoverPreview(null);
-        overlaysRef.current.forEach((overlay) => map.removeOverLay(overlay));
+        overlaysRef.current.forEach((overlay) => overlay.setMap?.(null));
         overlaysRef.current = [];
     }
 
     function addOverlay(overlay: any) {
-        mapInstanceRef.current?.addOverLay(overlay);
+        overlay.setMap?.(mapInstanceRef.current);
         overlaysRef.current.push(overlay);
     }
 
-    function createRecognitionMarker(point: any, item: AssociatedRecognition) {
-        if (!window.T || !item.image_url) {
-            return new window.T.Marker(point);
+    function updateHoverPreview(imageUrl: string, originalImage: string, lng: number, lat: number) {
+        const map = mapInstanceRef.current;
+        const container = mapRef.current;
+        if (!map || !container) {
+            return;
         }
 
-        const icon = new window.T.Icon({
-            iconUrl: item.image_url,
-            iconSize: new window.T.Point(24, 24),
-            iconAnchor: new window.T.Point(12, 12),
-        });
-        const marker = new window.T.Marker(point, { icon });
-        const updateHoverPreview = () => {
-            const map = mapInstanceRef.current;
-            const container = mapRef.current;
-            const pixel = map?.lngLatToContainerPoint?.(point);
-            const containerWidth = container?.clientWidth ?? 0;
-            const containerHeight = container?.clientHeight ?? 0;
-            const x = typeof pixel?.x === "number" ? pixel.x : containerWidth / 2;
-            const y = typeof pixel?.y === "number" ? pixel.y : containerHeight / 2;
+        const pixel = map.lngLatToContainer([lng, lat]);
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const x = typeof pixel?.x === "number" ? pixel.x : width / 2;
+        const y = typeof pixel?.y === "number" ? pixel.y : height / 2;
 
-            setHoverPreview({
-                imageUrl: item.image_url!,
-                originalImage: item.original_image,
-                x,
-                y,
-                alignRight: x > containerWidth - 280,
-                alignBottom: y > containerHeight - 280,
+        setHoverPreview({
+            imageUrl,
+            originalImage,
+            x,
+            y,
+            alignRight: x > width - 280,
+            alignBottom: y > height - 280,
+        });
+    }
+
+    function createRecognitionMarker(item: AssociatedRecognition) {
+        const lng = Number(item.longitude);
+        const lat = Number(item.latitude);
+
+        if (!item.image_url) {
+            return new window.AMap.Marker({
+                position: [lng, lat],
             });
-        };
+        }
 
-        marker.addEventListener("mouseover", () => {
-            updateHoverPreview();
+        const marker = new window.AMap.Marker({
+            position: [lng, lat],
+            anchor: "center",
+            content: createImageMarkerContent(item.image_url),
         });
-        marker.addEventListener("mousemove", () => {
-            updateHoverPreview();
+
+        marker.on("mouseover", () => {
+            updateHoverPreview(item.image_url!, item.original_image, lng, lat);
         });
-        marker.addEventListener("mouseout", () => {
+        marker.on("mousemove", () => {
+            updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+        });
+        marker.on("mouseout", () => {
             setHoverPreview(null);
         });
 
         return marker;
+    }
+
+    function renderProvinceOutline() {
+        const map = mapInstanceRef.current;
+        if (!map || !provinceBoundary?.rings.length) {
+            return;
+        }
+
+        provinceBoundary.rings.forEach((ring) => {
+            const polyline = new window.AMap.Polyline({
+                path: ring.map((point) => [point.lng, point.lat]),
+                strokeColor: "#1565c0",
+                strokeWeight: 3,
+                strokeOpacity: 0.95,
+                strokeStyle: "solid",
+                fillOpacity: 0,
+                bubble: true,
+            });
+            addOverlay(polyline);
+        });
     }
 
     function renderOverviewMap() {
@@ -428,152 +487,106 @@ export default function AssociationWorkspace() {
             return;
         }
 
-        const points: any[] = [];
-
-        if (provinceBoundary?.rings.length) {
-            provinceBoundary.rings.forEach((ring) => {
-                const boundaryPoints = ring.map((point) => new window.T.LngLat(point.lng, point.lat));
-                const polygon = new window.T.Polygon(boundaryPoints, {
-                    color: "#0f5c43",
-                    weight: 2,
-                    opacity: 0.95,
-                    fillColor: "#dceee5",
-                    fillOpacity: 0.08,
-                });
-                addOverlay(polygon);
-                points.push(...boundaryPoints);
-            });
-
-            if (provinceBoundary.bounds && map.setMaxBounds) {
-                map.setMaxBounds(
-                    new window.T.LngLatBounds(
-                        new window.T.LngLat(provinceBoundary.bounds.minLng, provinceBoundary.bounds.minLat),
-                        new window.T.LngLat(provinceBoundary.bounds.maxLng, provinceBoundary.bounds.maxLat),
-                    ),
-                );
-            }
-        }
+        const fitItems: any[] = [];
+        renderProvinceOutline();
 
         preview.farms.forEach((farm) => {
-            const point = new window.T.LngLat(farm.longitude, farm.latitude);
-            points.push(point);
-
-            const markerIcon = farm.associated_count === 0
-                ? new window.T.Icon({
-                    iconUrl:
-                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='34' viewBox='0 0 24 34'><path fill='%23d32f2f' d='M12 0C5.372 0 0 5.372 0 12c0 8.6 12 22 12 22s12-13.4 12-22C24 5.372 18.628 0 12 0z'/><circle cx='12' cy='12' r='5' fill='%23ffffff'/></svg>",
-                    iconSize: new window.T.Point(24, 34),
-                    iconAnchor: new window.T.Point(12, 34),
-                })
-                : undefined;
-            const marker = markerIcon ? new window.T.Marker(point, { icon: markerIcon }) : new window.T.Marker(point);
-            marker.addEventListener("click", () => setSelectedFarmId(farm.id));
-            addOverlay(marker);
-
-            const label = new window.T.Label({
-                text: `${farm.site_name || farm.enterprise_name} (${farm.associated_count})`,
-                position: point,
-                offset: new window.T.Point(-44, -56),
+            const marker = new window.AMap.Marker({
+                position: [farm.longitude, farm.latitude],
+                anchor: "bottom-center",
+                content: createFarmMarkerContent(farm.associated_count === 0 ? "#d32f2f" : "#0f5c43"),
             });
-            label.setBackgroundColor("rgba(255,255,255,0.9)");
-            label.setBorderLine(1);
-            label.setFontColor("#0f3d2e");
+            if (farm.associated_count > 0) {
+                marker.on("click", () => setSelectedFarmId(farm.id));
+            }
+            addOverlay(marker);
+            fitItems.push(marker);
+
+            const label = new window.AMap.Marker({
+                position: [farm.longitude, farm.latitude],
+                anchor: "bottom-center",
+                offset: new window.AMap.Pixel(0, -44),
+                content: createFarmLabel(`${farm.site_name || farm.enterprise_name} (${farm.associated_count})`),
+            });
             addOverlay(label);
         });
 
         preview.outliers.forEach((item) => {
-            const point = new window.T.LngLat(Number(item.longitude), Number(item.latitude));
-            points.push(point);
-            const circle = new window.T.Circle(point, 150, {
-                color: "#64b5f6",
-                weight: 1,
-                opacity: 0.9,
+            const circle = new window.AMap.Circle({
+                center: [Number(item.longitude), Number(item.latitude)],
+                radius: 150,
+                strokeColor: "#64b5f6",
+                strokeWeight: 1,
+                strokeOpacity: 0.9,
                 fillColor: "#bbdefb",
                 fillOpacity: 0.75,
             });
             addOverlay(circle);
+            fitItems.push(circle);
         });
 
-        if (points.length) {
-            map.setViewport(points);
+        if (provinceBoundary?.bounds) {
+            map.setLimitBounds?.(provinceBoundary.bounds);
+        }
+        if (fitItems.length) {
+            map.setFitView(fitItems, false, [40, 40, 40, 40], 8);
         }
     }
 
     function renderFarmDetailMap(farm: FarmPreview) {
         const map = mapInstanceRef.current;
-        if (!map || !window.T) {
+        if (!map) {
             return;
         }
 
-        const center = new window.T.LngLat(farm.longitude, farm.latitude);
-        if (map.setMaxBounds) {
-            map.setMaxBounds(null);
-        }
-        const farmMarker = new window.T.Marker(center);
+        renderProvinceOutline();
+
+        const farmMarker = new window.AMap.Marker({
+            position: [farm.longitude, farm.latitude],
+            anchor: "bottom-center",
+            content: createFarmMarkerContent("#0f5c43"),
+        });
         addOverlay(farmMarker);
 
-        const viewportPoints = [center];
-        const radiusCircle = new window.T.Circle(center, radiusMeters, {
-            color: "#1565c0",
-            weight: 1,
-            opacity: 0.85,
-            lineStyle: "dashed",
+        const fitItems: any[] = [farmMarker];
+        const radiusCircle = new window.AMap.Circle({
+            center: [farm.longitude, farm.latitude],
+            radius: radiusMeters,
+            strokeColor: "#1565c0",
+            strokeWeight: 1,
+            strokeOpacity: 0.85,
+            strokeStyle: "dashed",
             fillColor: "#90caf9",
             fillOpacity: 0.08,
         });
         addOverlay(radiusCircle);
+        fitItems.push(radiusCircle);
+
         farm.associated.forEach((item) => {
-            const point = new window.T.LngLat(Number(item.longitude), Number(item.latitude));
-            viewportPoints.push(point);
-            const marker = createRecognitionMarker(point, item);
+            const marker = createRecognitionMarker(item);
             addOverlay(marker);
+            fitItems.push(marker);
         });
 
         if (farm.boundary.length >= 3) {
-            const boundaryPoints = farm.boundary.map(
-                (point) => new window.T.LngLat(point.lng, point.lat),
-            );
-            const polygon = new window.T.Polygon(boundaryPoints, {
-                color: "#1565c0",
-                weight: 2,
-                opacity: 0.9,
+            const polygon = new window.AMap.Polygon({
+                path: farm.boundary.map((point) => [point.lng, point.lat]),
+                strokeColor: "#1565c0",
+                strokeWeight: 2,
+                strokeOpacity: 0.9,
                 fillColor: "#90caf9",
-                fillOpacity: 0.22,
+                fillOpacity: 0.18,
             });
             addOverlay(polygon);
-            viewportPoints.push(...boundaryPoints);
-        } else if (farm.associated.length >= 2) {
-            const linePoints = [
-                center,
-                ...farm.associated.map(
-                    (item) => new window.T.LngLat(Number(item.longitude), Number(item.latitude)),
-                ),
-            ];
-            const polyline = new window.T.Polyline(linePoints, {
-                color: "#1565c0",
-                weight: 2,
-                opacity: 0.9,
-            });
-            addOverlay(polyline);
-            viewportPoints.push(...linePoints);
-        } else if (farm.associated.length === 1) {
-            const point = new window.T.LngLat(
-                Number(farm.associated[0].longitude),
-                Number(farm.associated[0].latitude),
-            );
-            const polyline = new window.T.Polyline([center, point], {
-                color: "#1565c0",
-                weight: 2,
-                opacity: 0.9,
-            });
-            addOverlay(polyline);
-            viewportPoints.push(point);
+            fitItems.push(polygon);
         }
 
-        if (viewportPoints.length) {
-            map.setViewport(viewportPoints);
-        } else {
-            map.centerAndZoom(center, 12);
+        if (provinceBoundary?.bounds) {
+            map.setLimitBounds?.(provinceBoundary.bounds);
+        }
+        if (fitItems.length) {
+            map.setFitView(fitItems, false, [60, 60, 60, 60], 11);
+            map.setCenter([farm.longitude, farm.latitude]);
         }
     }
 
@@ -588,12 +601,14 @@ export default function AssociationWorkspace() {
 
     return (
         <>
-            <Script
-                src={`https://api.tianditu.gov.cn/api?v=4.0&tk=${tianMapKey}`}
-                strategy="afterInteractive"
-                onLoad={() => setScriptReady(true)}
-                onReady={() => setScriptReady(true)}
-            />
+            {canLoadMapScript ? (
+                <Script
+                    src={`https://webapi.amap.com/maps?v=2.0&key=${amapKey}&plugin=AMap.DistrictLayer`}
+                    strategy="afterInteractive"
+                    onLoad={() => setScriptReady(true)}
+                    onReady={() => setScriptReady(true)}
+                />
+            ) : null}
 
             <Stack spacing={3}>
                 <Card elevation={0} sx={{ borderRadius: 5, border: "1px solid rgba(16, 74, 54, 0.1)" }}>
@@ -628,25 +643,26 @@ export default function AssociationWorkspace() {
                                         }))
                                     }
                                 />
-                                <TextField
-                                    select
-                                    label="省份"
+                                <Autocomplete
+                                    options={provinces}
                                     size="small"
-                                    sx={{ minWidth: 160, ...compactFieldSx }}
-                                    value={filters.province}
-                                    onChange={(event) =>
+                                    sx={{ minWidth: 180 }}
+                                    value={selectedProvince}
+                                    getOptionLabel={(option) => option.name}
+                                    isOptionEqualToValue={(option, value) => option.adcode === value.adcode}
+                                    onChange={(_, value) => {
+                                        if (!value) {
+                                            return;
+                                        }
                                         setFilters((current) => ({
                                             ...current,
-                                            province: event.target.value,
-                                        }))
-                                    }
-                                >
-                                    {provinces.map((province) => (
-                                        <MenuItem key={province.adcode} value={province.name}>
-                                            {province.name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                            province: value.name,
+                                        }));
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="省份" sx={compactFieldSx} />
+                                    )}
+                                />
                                 <Box sx={{ flexGrow: 1 }} />
                                 <Button
                                     variant="contained"
@@ -715,27 +731,61 @@ export default function AssociationWorkspace() {
                                     backgroundColor: "#dfe8de",
                                 }}
                             />
-                            {provinceMaskPath ? (
-                                <Box
-                                    component="svg"
-                                    viewBox={`0 0 ${mapRef.current?.clientWidth ?? 1} ${mapRef.current?.clientHeight ?? 1}`}
-                                    preserveAspectRatio="none"
-                                    sx={{
-                                        position: "absolute",
-                                        inset: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        zIndex: 4,
-                                        pointerEvents: "none",
-                                    }}
-                                >
-                                    <path
-                                        d={provinceMaskPath}
-                                        fill="rgba(255,255,255,0.88)"
-                                        fillRule="evenodd"
-                                    />
-                                </Box>
-                            ) : null}
+                            <Box
+                                sx={{
+                                    position: "absolute",
+                                    top: 16,
+                                    left: 16,
+                                    zIndex: 6,
+                                    px: 1.25,
+                                    py: 1,
+                                    borderRadius: 2,
+                                    backgroundColor: "rgba(255,255,255,0.94)",
+                                    border: "1px solid rgba(15, 61, 46, 0.12)",
+                                    boxShadow: "0 10px 24px rgba(15, 61, 46, 0.12)",
+                                }}
+                            >
+                                <Stack direction="row" spacing={2} alignItems="center">
+                                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#163c2f" }}>
+                                        图例
+                                    </Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box
+                                            component="img"
+                                            src={createLegendMarkerDataUri("#d32f2f")}
+                                            alt="未关联"
+                                            sx={{ width: 12, height: 17, display: "block", ml: "-1px" }}
+                                        />
+                                        <Typography variant="body2" color="text.secondary">
+                                            未关联
+                                        </Typography>
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box
+                                            component="img"
+                                            src={createLegendMarkerDataUri("#0f5c43")}
+                                            alt="已关联"
+                                            sx={{ width: 12, height: 17, display: "block", ml: "-1px" }}
+                                        />
+                                        <Typography variant="body2" color="text.secondary">
+                                            已关联
+                                        </Typography>
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Box
+                                            sx={{
+                                                width: 9,
+                                                height: 9,
+                                                borderRadius: "50%",
+                                                backgroundColor: "#64b5f6",
+                                            }}
+                                        />
+                                        <Typography variant="body2" color="text.secondary">
+                                            零星
+                                        </Typography>
+                                    </Stack>
+                                </Stack>
+                            </Box>
                             {hoverPreview ? (
                                 <Box
                                     sx={{
@@ -795,21 +845,21 @@ export default function AssociationWorkspace() {
                                         selectedFarm.associated
                                             .filter((item) => item.image_url)
                                             .map((item) => (
-                                            <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
-                                                <Box
-                                                    component="img"
-                                                    src={item.image_url!}
-                                                    alt={item.original_image}
-                                                    sx={{
-                                                        width: "100%",
-                                                        aspectRatio: "1 / 1",
-                                                        objectFit: "cover",
-                                                        borderRadius: 2,
-                                                        border: "1px solid rgba(0,0,0,0.08)",
-                                                    }}
-                                                />
-                                            </Grid>
-                                        ))
+                                                <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
+                                                    <Box
+                                                        component="img"
+                                                        src={item.image_url!}
+                                                        alt={item.original_image}
+                                                        sx={{
+                                                            width: "100%",
+                                                            aspectRatio: "1 / 1",
+                                                            objectFit: "cover",
+                                                            borderRadius: 2,
+                                                            border: "1px solid rgba(0,0,0,0.08)",
+                                                        }}
+                                                    />
+                                                </Grid>
+                                            ))
                                     ) : (
                                         <Grid size={12}>
                                             <Typography color="text.secondary">该场站暂无可预览图片。</Typography>
