@@ -51,13 +51,41 @@ const importSchemas: Record<
     },
     "solar-recognition": {
         headers: ["Tile_Name", "Longitude", "Latitude", "Empty_Column", "Province", "City_County"],
-        requiredFields: ["Tile_Name", "Longitude", "Latitude", "Province", "City_County"],
+        requiredFields: ["original_image", "longitude", "latitude", "province", "city"],
     },
     "wind-recognition": {
         headers: ["original_image", "turbine_lon", "turbine_lat", "province", "city"],
-        requiredFields: ["original_image", "turbine_lon", "turbine_lat", "province", "city"],
+        requiredFields: ["original_image", "longitude", "latitude", "province", "city"],
     },
 };
+
+function getRecognitionField(
+    row: Record<string, string>,
+    type: "solar-recognition" | "wind-recognition",
+    field: "original_image" | "longitude" | "latitude" | "province" | "city" | "poi",
+) {
+    const keyMap =
+        type === "solar-recognition"
+            ? {
+                  original_image: ["Tile_Name", "原始图片"],
+                  longitude: ["Longitude", "经度"],
+                  latitude: ["Latitude", "纬度"],
+                  province: ["Province", "省"],
+                  city: ["City_County", "市"],
+                  poi: ["poi", "POI", "Poi"],
+              }
+            : {
+                  original_image: ["original_image", "原始图片"],
+                  longitude: ["turbine_lon", "经度"],
+                  latitude: ["turbine_lat", "纬度"],
+                  province: ["province", "省"],
+                  city: ["city", "市"],
+                  poi: ["poi", "POI", "Poi"],
+              };
+
+    const matchedKey = keyMap[field].find((key) => key in row);
+    return matchedKey ? String(row[matchedKey] ?? "").trim() : "";
+}
 
 function decodeCsv(buffer: Buffer) {
     const text = buffer.toString("utf-8").replace(/^\uFEFF/, "");
@@ -171,19 +199,20 @@ async function importRecognition(
 
     for (const [index, row] of rows.entries()) {
         const originalImage =
-            type === "solar-recognition" ? row["Tile_Name"] ?? "" : row["original_image"] ?? "";
+            getRecognitionField(row, type, "original_image");
         const provinceCode =
-            type === "solar-recognition" ? row["Province"] ?? "" : row["province"] ?? "";
+            getRecognitionField(row, type, "province");
         db.run(`
             INSERT INTO ${tableName} (
-                original_image, province_code, province_name, city, longitude, latitude, image_exists, updated_at
+                original_image, province_code, province_name, city, longitude, latitude, poi, image_exists, updated_at
             ) VALUES (
                 '${escapeSql(originalImage)}',
                 '${escapeSql(provinceCode)}',
                 '${escapeSql(provinceMap[provinceCode.toLowerCase()] ?? provinceCode)}',
-                '${escapeSql(type === "solar-recognition" ? row["City_County"] ?? "" : row["city"] ?? "")}',
-                '${escapeSql(type === "solar-recognition" ? row["Longitude"] ?? "" : row["turbine_lon"] ?? "")}',
-                '${escapeSql(type === "solar-recognition" ? row["Latitude"] ?? "" : row["turbine_lat"] ?? "")}',
+                '${escapeSql(getRecognitionField(row, type, "city"))}',
+                '${escapeSql(getRecognitionField(row, type, "longitude"))}',
+                '${escapeSql(getRecognitionField(row, type, "latitude"))}',
+                '${escapeSql(getRecognitionField(row, type, "poi"))}',
                 ${imageNames.has(originalImage) ? 1 : 0},
                 CURRENT_TIMESTAMP
             )
@@ -193,6 +222,7 @@ async function importRecognition(
                 city=excluded.city,
                 longitude=excluded.longitude,
                 latitude=excluded.latitude,
+                poi=excluded.poi,
                 image_exists=excluded.image_exists,
                 updated_at=CURRENT_TIMESTAMP
         `);
@@ -206,18 +236,33 @@ export async function startImport(type: ImportType, buffer: Buffer) {
     const rows = decodeCsv(buffer);
     const schema = importSchemas[type];
     const rowHeaders = rows[0] ? Object.keys(rows[0]) : [];
-    const missingHeaders = schema.headers.filter((header) => !rowHeaders.includes(header));
 
     if (!rows.length) {
         throw new Error("导入文件没有可导入的数据行");
     }
-    if (missingHeaders.length) {
-        throw new Error(`导入文件格式不正确，缺少字段: ${missingHeaders.join("、")}`);
+    if (type === "power-fields") {
+        const missingHeaders = schema.headers.filter((header) => !rowHeaders.includes(header));
+        if (missingHeaders.length) {
+            throw new Error(`导入文件格式不正确，缺少字段: ${missingHeaders.join("、")}`);
+        }
+    }
+    if (type !== "power-fields" && !schema.requiredFields.every((field) => getRecognitionField(rows[0], type, field as "original_image" | "longitude" | "latitude" | "province" | "city" | "poi") !== "")) {
+        throw new Error("导入文件格式不正确，缺少识别数据必要字段");
     }
 
     for (const [index, row] of rows.entries()) {
+        if (type === "power-fields") {
+            const emptyField = schema.requiredFields.find(
+                (field) => !String(row[field] ?? "").trim(),
+            );
+            if (emptyField) {
+                throw new Error(`第 ${index + 1} 行缺少必填字段: ${emptyField}`);
+            }
+            continue;
+        }
+
         const emptyField = schema.requiredFields.find(
-            (field) => !String(row[field] ?? "").trim(),
+            (field) => !getRecognitionField(row, type, field as "original_image" | "longitude" | "latitude" | "province" | "city" | "poi"),
         );
         if (emptyField) {
             throw new Error(`第 ${index + 1} 行缺少必填字段: ${emptyField}`);

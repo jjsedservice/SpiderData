@@ -15,7 +15,7 @@ DEFAULT_CACHE = '/Users/patcher/Documents/Work/SpiderData/tianditu_geocode_cache
 DEFAULT_CACHE_JS = '/Users/patcher/Documents/Work/SpiderData/tianditu_geocode_cache.js'
 DEFAULT_TIMEOUT = 20
 DEFAULT_SLEEP_SECONDS = 0.15
-DEFAULT_TK = '5a27a1e072e0551442ecd5805f39924b'
+DEFAULT_TK = 'b0955d5fb6e62c7e90a97d8b3fa4a3f5'
 
 OUTPUT_EXTRA_COLUMNS = [
     '查询地址',

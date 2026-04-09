@@ -62,13 +62,13 @@ const templateMap = {
     },
     "solar-recognition": {
         downloadName: "光伏识别数据导入模板.csv",
-        header: ["Tile_Name", "Longitude", "Latitude", "Empty_Column", "Province", "City_County"],
-        sample: ["102602_56756.jpg", "101.80618286132812", "23.431749035651656", "", "yunnan", "个旧市"],
+        header: ["Tile_Name", "Longitude", "Latitude", "Empty_Column", "Province", "City_County", "poi"],
+        sample: ["102602_56756.jpg", "101.80618286132812", "23.431749035651656", "", "yunnan", "个旧市", "鸡街镇"],
     },
     "wind-recognition": {
         downloadName: "风电识别数据导入模板.csv",
-        header: ["original_image", "turbine_lon", "turbine_lat", "province", "city"],
-        sample: ["102973_55782.jpg", "102.82523", "25.861921", "yunnan", "昆明市"],
+        header: ["original_image", "turbine_lon", "turbine_lat", "province", "city", "poi"],
+        sample: ["102973_55782.jpg", "102.82523", "25.861921", "yunnan", "昆明市", "剑角峰"],
     },
 } as const;
 

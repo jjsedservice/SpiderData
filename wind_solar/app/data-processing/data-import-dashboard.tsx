@@ -65,6 +65,7 @@ type RecognitionRow = {
     city: string;
     longitude: string;
     latitude: string;
+    poi?: string;
     image_exists: number;
     image_url?: string | null;
 };
@@ -978,7 +979,7 @@ function RecognitionSection(props: {
             </CardActions>
             {props.error ? <Alert severity="error">{props.error}</Alert> : null}
             <Box sx={{ overflowX: "auto" }}>
-                <Table size="small" sx={{ minWidth: 760, tableLayout: "fixed" }}>
+                <Table size="small" sx={{ minWidth: 920, tableLayout: "fixed" }}>
                     <TableHead>
                         <TableRow>
                             <TableCell
@@ -998,6 +999,7 @@ function RecognitionSection(props: {
                             <TableCell sx={{ width: 80, minWidth: 80, maxWidth: 80 }}>图片</TableCell>
                             <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>经度</TableCell>
                             <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>纬度</TableCell>
+                            <TableCell sx={{ width: 160, minWidth: 160, maxWidth: 160 }}>位子信息</TableCell>
                             <TableCell
                                 sx={{
                                     position: "sticky",
@@ -1109,6 +1111,18 @@ function RecognitionSection(props: {
                                     }}
                                 >
                                     {row.latitude}
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        width: 160,
+                                        minWidth: 160,
+                                        maxWidth: 160,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                    }}
+                                >
+                                    {row.poi || ""}
                                 </TableCell>
                                 <TableCell
                                     sx={{

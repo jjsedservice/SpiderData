@@ -28,6 +28,7 @@ type RecognitionDbRow = {
     city: string;
     longitude: string;
     latitude: string;
+    poi?: string;
     image_exists: number;
 };
 
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
 
         if (format === "csv") {
             const lines = [
-                ["原始图片", "省", "市", "经度", "纬度"].map(toCsvValue).join(","),
+                ["原始图片", "省", "市", "经度", "纬度", "POI"].map(toCsvValue).join(","),
                 ...filteredRows.map((row) =>
                     [
                         row.original_image,
@@ -92,6 +93,7 @@ export async function GET(request: Request) {
                         row.city,
                         row.longitude,
                         row.latitude,
+                        row.poi ?? "",
                     ]
                         .map(toCsvValue)
                         .join(","),

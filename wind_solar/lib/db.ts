@@ -74,6 +74,7 @@ function initializeSchema(db: SqlDatabase) {
             city TEXT,
             longitude TEXT,
             latitude TEXT,
+            poi TEXT,
             image_exists INTEGER DEFAULT 0,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -87,6 +88,7 @@ function initializeSchema(db: SqlDatabase) {
             city TEXT,
             longitude TEXT,
             latitude TEXT,
+            poi TEXT,
             image_exists INTEGER DEFAULT 0,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -111,6 +113,16 @@ function initializeSchema(db: SqlDatabase) {
     }
     if (!hasCapacityColumn) {
         db.run("ALTER TABLE power_fields ADD COLUMN capacity TEXT");
+    }
+    const solarColumns = db.exec("PRAGMA table_info(solar_recognition)");
+    const hasSolarPoiColumn = solarColumns[0]?.values.some((valueRow) => valueRow[1] === "poi");
+    if (!hasSolarPoiColumn) {
+        db.run("ALTER TABLE solar_recognition ADD COLUMN poi TEXT");
+    }
+    const windColumns = db.exec("PRAGMA table_info(wind_recognition)");
+    const hasWindPoiColumn = windColumns[0]?.values.some((valueRow) => valueRow[1] === "poi");
+    if (!hasWindPoiColumn) {
+        db.run("ALTER TABLE wind_recognition ADD COLUMN poi TEXT");
     }
 }
 

@@ -31,6 +31,7 @@ declare global {
 }
 
 type EnergyType = "wind" | "solar";
+type AssociationMode = "radius" | "poi";
 
 type BoundaryPoint = {
     lng: number;
@@ -285,6 +286,7 @@ export default function AssociationWorkspace() {
     const [drawingPixels, setDrawingPixels] = useState<Array<{ x: number; y: number }>>([]);
     const [filters, setFilters] = useState({
         type: "wind" as EnergyType,
+        mode: "radius" as AssociationMode,
         radiusKm: defaultRadiusByType("wind"),
         province: "云南",
     });
@@ -537,6 +539,7 @@ export default function AssociationWorkspace() {
         try {
             const params = new URLSearchParams({
                 type: filters.type,
+                mode: filters.mode,
                 radiusKm: filters.radiusKm,
                 province: filters.province,
             });
@@ -1056,10 +1059,27 @@ export default function AssociationWorkspace() {
                                     <MenuItem value="solar">光伏</MenuItem>
                                 </TextField>
                                 <TextField
+                                    select
+                                    label="关联方式"
+                                    size="small"
+                                    sx={{ minWidth: 160, ...compactFieldSx }}
+                                    value={filters.mode}
+                                    onChange={(event) =>
+                                        setFilters((current) => ({
+                                            ...current,
+                                            mode: event.target.value as AssociationMode,
+                                        }))
+                                    }
+                                >
+                                    <MenuItem value="radius">半径关联</MenuItem>
+                                    <MenuItem value="poi">位子信息关联</MenuItem>
+                                </TextField>
+                                <TextField
                                     label="关联半径(km)"
                                     size="small"
                                     sx={{ minWidth: 150, ...compactFieldSx }}
                                     value={filters.radiusKm}
+                                    disabled={filters.mode === "poi"}
                                     onChange={(event) =>
                                         setFilters((current) => ({
                                             ...current,

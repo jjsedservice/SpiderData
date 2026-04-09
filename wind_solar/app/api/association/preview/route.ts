@@ -3,6 +3,7 @@ import { execRows, getDatabase } from "@/lib/db";
 import { findRecognitionImage } from "@/lib/recognition-images";
 
 type EnergyType = "wind" | "solar";
+type AssociationMode = "radius" | "poi";
 
 type FarmRow = {
     id: number;
@@ -13,6 +14,7 @@ type FarmRow = {
     province: string;
     longitude: string;
     latitude: string;
+    raw_address: string;
 };
 
 type RecognitionRow = {
@@ -22,6 +24,7 @@ type RecognitionRow = {
     city: string;
     longitude: string;
     latitude: string;
+    poi?: string;
     image_exists: number;
 };
 
@@ -141,6 +144,24 @@ function energyMatchClause(type: EnergyType) {
         : "(power_type = '太阳能发电' OR power_type = '分布式光伏')";
 }
 
+function normalizePoiText(value: string) {
+    return String(value ?? "")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[()（）_\-—,，。.、]/g, "");
+}
+
+function isPoiMatched(rawAddress: string, poi: string) {
+    const normalizedAddress = normalizePoiText(rawAddress);
+    const normalizedPoi = normalizePoiText(poi);
+
+    if (!normalizedAddress || !normalizedPoi || normalizedAddress.length < 2 || normalizedPoi.length < 2) {
+        return false;
+    }
+
+    return normalizedPoi.includes(normalizedAddress) || normalizedAddress.includes(normalizedPoi);
+}
+
 async function enrichRecognition(type: EnergyType, row: RecognitionRow) {
     const filePath = row.image_exists
         ? await findRecognitionImage(type, String(row.original_image))
@@ -163,6 +184,7 @@ export async function GET(request: Request) {
         const { db } = await getDatabase();
         const { searchParams } = new URL(request.url);
         const type = (searchParams.get("type") ?? "wind") as EnergyType;
+        const mode = (searchParams.get("mode") ?? "radius") as AssociationMode;
         const radiusKm = Number(searchParams.get("radiusKm") ?? "10");
         const province = (searchParams.get("province") ?? "").trim();
         const farmClauses = [energyMatchClause(type)];
@@ -180,7 +202,7 @@ export async function GET(request: Request) {
 
         const farms = execRows<FarmRow>(
             db,
-            `SELECT id, enterprise_name, site_name, power_type, capacity, province, longitude, latitude
+            `SELECT id, enterprise_name, site_name, power_type, capacity, province, longitude, latitude, raw_address
              FROM power_fields
              WHERE ${farmClauses.join(" AND ")}
              ORDER BY enterprise_name ASC`,
@@ -188,7 +210,7 @@ export async function GET(request: Request) {
 
         const recognitionRows = execRows<RecognitionRow>(
             db,
-            `SELECT id, original_image, province_name, city, longitude, latitude, image_exists
+            `SELECT id, original_image, province_name, city, longitude, latitude, poi, image_exists
              FROM ${recognitionTable}
              ${recognitionClauses.length ? `WHERE ${recognitionClauses.join(" AND ")}` : ""}
              ORDER BY id DESC`,
@@ -233,6 +255,19 @@ export async function GET(request: Request) {
             let nearestDistance = Number.POSITIVE_INFINITY;
 
             for (const farm of farmMap.values()) {
+                if (mode === "poi") {
+                    if (isPoiMatched(farm.raw_address, String(recognition.poi ?? ""))) {
+                        const distance = distanceKm(point, {
+                            lng: farm.longitude,
+                            lat: farm.latitude,
+                        });
+                        if (distance < nearestDistance) {
+                            matchedFarmId = farm.id;
+                            nearestDistance = distance;
+                        }
+                    }
+                    continue;
+                }
                 const distance = distanceKm(point, {
                     lng: farm.longitude,
                     lat: farm.latitude,
