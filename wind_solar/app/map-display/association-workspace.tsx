@@ -215,6 +215,19 @@ function createImageMarkerContent(imageUrl: string) {
     `;
 }
 
+function createOutlierMarkerContent() {
+    return `
+        <div style="
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            background:#64b5f6;
+            border:1px solid rgba(255,255,255,0.9);
+            box-shadow:0 4px 10px rgba(100,181,246,0.28);
+        "></div>
+    `;
+}
+
 export default function AssociationWorkspace() {
     const mapRef = useRef<HTMLDivElement | null>(null);
     const mapInstanceRef = useRef<any>(null);
@@ -461,6 +474,30 @@ export default function AssociationWorkspace() {
         return marker;
     }
 
+    function createOutlierMarker(item: OutlierPreview) {
+        const lng = Number(item.longitude);
+        const lat = Number(item.latitude);
+        const marker = new window.AMap.Marker({
+            position: [lng, lat],
+            anchor: "center",
+            content: createOutlierMarkerContent(),
+        });
+
+        if (item.image_url) {
+            marker.on("mouseover", () => {
+                updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+            });
+            marker.on("mousemove", () => {
+                updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+            });
+            marker.on("mouseout", () => {
+                setHoverPreview(null);
+            });
+        }
+
+        return marker;
+    }
+
     function renderProvinceOutline() {
         const map = mapInstanceRef.current;
         if (!map || !provinceBoundary?.rings.length) {
@@ -496,9 +533,7 @@ export default function AssociationWorkspace() {
                 anchor: "bottom-center",
                 content: createFarmMarkerContent(farm.associated_count === 0 ? "#d32f2f" : "#0f5c43"),
             });
-            if (farm.associated_count > 0) {
-                marker.on("click", () => setSelectedFarmId(farm.id));
-            }
+            marker.on("click", () => setSelectedFarmId(farm.id));
             addOverlay(marker);
             fitItems.push(marker);
 
@@ -511,6 +546,10 @@ export default function AssociationWorkspace() {
             addOverlay(label);
         });
 
+        if (fitItems.length) {
+            map.setFitView(fitItems, false, [40, 40, 40, 40], 8);
+        }
+
         preview.outliers.forEach((item) => {
             const circle = new window.AMap.Circle({
                 center: [Number(item.longitude), Number(item.latitude)],
@@ -522,15 +561,7 @@ export default function AssociationWorkspace() {
                 fillOpacity: 0.75,
             });
             addOverlay(circle);
-            fitItems.push(circle);
         });
-
-        if (provinceBoundary?.bounds) {
-            map.setLimitBounds?.(provinceBoundary.bounds);
-        }
-        if (fitItems.length) {
-            map.setFitView(fitItems, false, [40, 40, 40, 40], 8);
-        }
     }
 
     function renderFarmDetailMap(farm: FarmPreview) {
@@ -581,13 +612,23 @@ export default function AssociationWorkspace() {
             fitItems.push(polygon);
         }
 
-        if (provinceBoundary?.bounds) {
-            map.setLimitBounds?.(provinceBoundary.bounds);
-        }
         if (fitItems.length) {
             map.setFitView(fitItems, false, [60, 60, 60, 60], 11);
-            map.setCenter([farm.longitude, farm.latitude]);
         }
+        map.setCenter([farm.longitude, farm.latitude]);
+        map.setZoom(11);
+
+        const bounds = map.getBounds?.();
+        preview?.outliers.forEach((item) => {
+            const lng = Number(item.longitude);
+            const lat = Number(item.latitude);
+            const isVisible = bounds?.contains?.([lng, lat]) ?? true;
+            if (!isVisible) {
+                return;
+            }
+            const marker = createOutlierMarker(item);
+            addOverlay(marker);
+        });
     }
 
     function renderMap() {
@@ -781,7 +822,7 @@ export default function AssociationWorkspace() {
                                             }}
                                         />
                                         <Typography variant="body2" color="text.secondary">
-                                            零星
+                                            零星（可悬停查看）
                                         </Typography>
                                     </Stack>
                                 </Stack>
