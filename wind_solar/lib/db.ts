@@ -7,28 +7,8 @@ let cachedPath = "";
 let cachedDb: SqlDatabase | null = null;
 let sqlRuntimePromise: Promise<SqlJsStatic> | null = null;
 
-function isMalformedDatabaseError(error: unknown) {
-    return error instanceof Error && error.message.includes("database disk image is malformed");
-}
-
-function isDatabaseUsable(db: SqlDatabase) {
-    try {
-        db.exec("PRAGMA schema_version");
-        return true;
-    } catch {
-        return false;
-    }
-}
-
 async function ensureDatabaseDirectory(filePath: string) {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
-}
-
-async function backupMalformedDatabase(filePath: string) {
-    const backupPath = `${filePath}.malformed-${Date.now()}.bak`;
-    await fs.copyFile(filePath, backupPath);
-    await fs.unlink(filePath);
-    return backupPath;
 }
 
 async function getRuntime() {
@@ -134,31 +114,17 @@ export async function getDatabase() {
     const settings = await readSettings();
     const filePath = path.join(process.cwd(), "assets", settings.dataFile);
 
-    if (!cachedDb || cachedPath !== filePath || !isDatabaseUsable(cachedDb)) {
+    if (!cachedDb || cachedPath !== filePath) {
         await ensureDatabaseDirectory(filePath);
         const SQL = await getRuntime();
         const exists = await fs
             .access(filePath)
             .then(() => true)
             .catch(() => false);
-        let db: SqlDatabase;
-
-        try {
-            const buffer = exists ? await fs.readFile(filePath) : null;
-            db = buffer ? new SQL.Database(buffer) : new SQL.Database();
-            initializeSchema(db);
-        } catch (error) {
-            if (!exists || !isMalformedDatabaseError(error)) {
-                throw error;
-            }
-
-            await backupMalformedDatabase(filePath);
-            db = new SQL.Database();
-            initializeSchema(db);
-        }
-
-        cachedDb = db;
+        const buffer = exists ? await fs.readFile(filePath) : null;
+        cachedDb = buffer ? new SQL.Database(buffer) : new SQL.Database();
         cachedPath = filePath;
+        initializeSchema(cachedDb);
         await persistDatabase(cachedDb, filePath);
     }
 

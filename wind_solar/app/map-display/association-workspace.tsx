@@ -94,10 +94,6 @@ type ProvinceBoundary = {
     bounds: [number, number, number, number] | null;
 };
 
-function defaultRadiusByType(type: EnergyType) {
-    return type === "wind" ? "50" : "20";
-}
-
 const amapKey = "3c2b3317bd1fd82708d2298085255cd5";
 const amapSecurityJsCode = "f91884f9854e1876e7062f294ab42185";
 
@@ -286,16 +282,19 @@ export default function AssociationWorkspace() {
     const [drawingPixels, setDrawingPixels] = useState<Array<{ x: number; y: number }>>([]);
     const [filters, setFilters] = useState({
         type: "wind" as EnergyType,
+<<<<<<< HEAD
         mode: "radius" as AssociationMode,
         radiusKm: defaultRadiusByType("wind"),
+=======
+        radiusKm: "10",
+>>>>>>> parent of 8260889 (修改默认值)
         province: "云南",
     });
 
     const selectedProvince =
         provinces.find((province) => province.name === filters.province) ?? null;
     const summary = preview?.summary ?? emptyPreview.summary;
-    const radiusMeters =
-        Math.max(Number(filters.radiusKm) || Number(defaultRadiusByType(filters.type)), 0.1) * 1000;
+    const radiusMeters = Math.max(Number(filters.radiusKm) || 10, 0.1) * 1000;
     const selectedFarm = useMemo(
         () => preview?.farms.find((farm) => farm.id === selectedFarmId) ?? null,
         [preview, selectedFarmId],
@@ -1051,7 +1050,6 @@ export default function AssociationWorkspace() {
                                         setFilters((current) => ({
                                             ...current,
                                             type: event.target.value as EnergyType,
-                                            radiusKm: defaultRadiusByType(event.target.value as EnergyType),
                                         }))
                                     }
                                 >
