@@ -97,6 +97,10 @@ function defaultRadiusByType(type: EnergyType) {
     return type === "wind" ? "50" : "20";
 }
 
+function defaultClusterByType(type: EnergyType) {
+    return type === "wind" ? "20" : "10";
+}
+
 const amapKey = "3c2b3317bd1fd82708d2298085255cd5";
 const amapSecurityJsCode = "f91884f9854e1876e7062f294ab42185";
 
@@ -286,6 +290,7 @@ export default function AssociationWorkspace() {
     const [filters, setFilters] = useState({
         type: "wind" as EnergyType,
         radiusKm: defaultRadiusByType("wind"),
+        clusterKm: defaultClusterByType("wind"),
         province: "云南",
     });
 
@@ -325,6 +330,8 @@ export default function AssociationWorkspace() {
             ),
         [manualAssociated, pendingManualOutliers],
     );
+    const selectedFarmOption =
+        preview?.farms.find((farm) => farm.id === selectedFarmId) ?? null;
 
     useEffect(() => {
         previewRef.current = preview;
@@ -538,6 +545,7 @@ export default function AssociationWorkspace() {
             const params = new URLSearchParams({
                 type: filters.type,
                 radiusKm: filters.radiusKm,
+                clusterKm: filters.clusterKm,
                 province: filters.province,
             });
             const payload = await fetchJson<{ ok: true } & AssociationPreview>(
@@ -909,6 +917,19 @@ export default function AssociationWorkspace() {
                 fillColor: "#bbdefb",
                 fillOpacity: 0.75,
             });
+            if (item.image_url) {
+                const lng = Number(item.longitude);
+                const lat = Number(item.latitude);
+                circle.on("mouseover", () => {
+                    updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+                });
+                circle.on("mousemove", () => {
+                    updateHoverPreview(item.image_url!, item.original_image, lng, lat);
+                });
+                circle.on("mouseout", () => {
+                    setHoverPreview(null);
+                });
+            }
             addOverlay(circle);
         });
     }
@@ -924,6 +945,18 @@ export default function AssociationWorkspace() {
         );
 
         renderProvinceOutline();
+
+        preview?.farms
+            .filter((item) => item.id !== farm.id)
+            .forEach((item) => {
+                const marker = new window.AMap.Marker({
+                    position: [item.longitude, item.latitude],
+                    anchor: "bottom-center",
+                    content: createFarmMarkerContent(item.associated_count === 0 ? "#d32f2f" : "#0f5c43"),
+                });
+                marker.on("click", () => setSelectedFarmId(item.id));
+                addOverlay(marker);
+            });
 
         const farmMarker = new window.AMap.Marker({
             position: [farm.longitude, farm.latitude],
@@ -1049,6 +1082,7 @@ export default function AssociationWorkspace() {
                                             ...current,
                                             type: event.target.value as EnergyType,
                                             radiusKm: defaultRadiusByType(event.target.value as EnergyType),
+                                            clusterKm: defaultClusterByType(event.target.value as EnergyType),
                                         }))
                                     }
                                 >
@@ -1058,7 +1092,7 @@ export default function AssociationWorkspace() {
                                 <TextField
                                     label="关联半径(km)"
                                     size="small"
-                                    sx={{ minWidth: 150, ...compactFieldSx }}
+                                    sx={{ minWidth: 110, ...compactFieldSx }}
                                     value={filters.radiusKm}
                                     onChange={(event) =>
                                         setFilters((current) => ({
@@ -1066,6 +1100,32 @@ export default function AssociationWorkspace() {
                                             radiusKm: event.target.value,
                                         }))
                                     }
+                                />
+                                <TextField
+                                    label="聚类范围(km)"
+                                    size="small"
+                                    sx={{ minWidth: 110, ...compactFieldSx }}
+                                    value={filters.clusterKm}
+                                    onChange={(event) =>
+                                        setFilters((current) => ({
+                                            ...current,
+                                            clusterKm: event.target.value,
+                                        }))
+                                    }
+                                />
+                                <Autocomplete
+                                    options={preview?.farms ?? []}
+                                    size="small"
+                                    sx={{ minWidth: 260 }}
+                                    value={selectedFarmOption}
+                                    getOptionLabel={(option) => option.site_name || option.enterprise_name}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    onChange={(_, value) => {
+                                        setSelectedFarmId(value?.id ?? null);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="搜索场站名" sx={compactFieldSx} />
+                                    )}
                                 />
                                 <Autocomplete
                                     options={provinces}

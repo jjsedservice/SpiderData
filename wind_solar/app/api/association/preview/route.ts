@@ -30,9 +30,25 @@ type ManualAssociationRow = {
     recognition_id: number;
 };
 
+type FarmAssociationRow = Omit<FarmRow, "longitude" | "latitude"> & {
+    longitude: number;
+    latitude: number;
+    associated: Array<
+        RecognitionRow & {
+            image_url: string | null;
+            distance_km: number;
+            association_source: "auto" | "manual";
+        }
+    >;
+};
+
 type Point = {
     lng: number;
     lat: number;
+};
+
+type EnrichedRecognitionRow = RecognitionRow & {
+    image_url: string | null;
 };
 
 function toRadians(value: number) {
@@ -158,12 +174,156 @@ function uniqueById<T extends { id: number }>(items: T[]) {
     return Array.from(new Map(items.map((item) => [item.id, item])).values());
 }
 
+function assignByRadiusWithCluster(
+    recognitions: EnrichedRecognitionRow[],
+    farmMap: Map<number, FarmAssociationRow>,
+    radiusKm: number,
+    clusterKm: number,
+) {
+    const recognitionPoints = new Map(
+        recognitions.map((recognition) => [
+            recognition.id,
+            {
+                recognition,
+                point: {
+                    lng: Number(recognition.longitude),
+                    lat: Number(recognition.latitude),
+                },
+            },
+        ]),
+    );
+    const seedAssignments = new Map<number, { farmId: number; distanceKm: number }>();
+
+    for (const [recognitionId, { point }] of recognitionPoints.entries()) {
+        let matchedFarmId: number | null = null;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        for (const farm of farmMap.values()) {
+            const distance = distanceKm(point, {
+                lng: farm.longitude,
+                lat: farm.latitude,
+            });
+            if (distance <= radiusKm && distance < nearestDistance) {
+                matchedFarmId = farm.id;
+                nearestDistance = distance;
+            }
+        }
+
+        if (matchedFarmId !== null) {
+            seedAssignments.set(recognitionId, {
+                farmId: matchedFarmId,
+                distanceKm: Number(nearestDistance.toFixed(3)),
+            });
+        }
+    }
+
+    const visited = new Set<number>();
+    const finalAssignments = new Map<number, { farmId: number; distanceKm: number }>();
+
+    for (const recognitionId of recognitionPoints.keys()) {
+        if (visited.has(recognitionId)) {
+            continue;
+        }
+
+        const queue = [recognitionId];
+        const component: number[] = [];
+        visited.add(recognitionId);
+
+        while (queue.length) {
+            const currentId = queue.shift()!;
+            component.push(currentId);
+            const currentPoint = recognitionPoints.get(currentId)!.point;
+
+            for (const [candidateId, { point: candidatePoint }] of recognitionPoints.entries()) {
+                if (visited.has(candidateId)) {
+                    continue;
+                }
+                if (distanceKm(currentPoint, candidatePoint) <= clusterKm) {
+                    visited.add(candidateId);
+                    queue.push(candidateId);
+                }
+            }
+        }
+
+        const componentSeeds = component
+            .map((id) => ({
+                id,
+                assignment: seedAssignments.get(id),
+            }))
+            .filter(
+                (
+                    item,
+                ): item is {
+                    id: number;
+                    assignment: { farmId: number; distanceKm: number };
+                } => Boolean(item.assignment),
+            );
+
+        if (!componentSeeds.length) {
+            continue;
+        }
+
+        const uniqueFarmIds = Array.from(
+            new Set(componentSeeds.map((item) => item.assignment.farmId)),
+        );
+
+        if (uniqueFarmIds.length === 1) {
+            const farmId = uniqueFarmIds[0];
+            const farm = farmMap.get(farmId)!;
+            component.forEach((id) => {
+                const point = recognitionPoints.get(id)!.point;
+                finalAssignments.set(id, {
+                    farmId,
+                    distanceKm: Number(
+                        distanceKm(point, {
+                            lng: farm.longitude,
+                            lat: farm.latitude,
+                        }).toFixed(3),
+                    ),
+                });
+            });
+            continue;
+        }
+
+        for (const id of component) {
+            const point = recognitionPoints.get(id)!.point;
+            let matchedFarmId: number | null = null;
+            let nearestSeedDistance = Number.POSITIVE_INFINITY;
+
+            for (const seed of componentSeeds) {
+                const seedPoint = recognitionPoints.get(seed.id)!.point;
+                const seedDistance = distanceKm(point, seedPoint);
+                if (seedDistance < nearestSeedDistance) {
+                    nearestSeedDistance = seedDistance;
+                    matchedFarmId = seed.assignment.farmId;
+                }
+            }
+
+            if (matchedFarmId !== null) {
+                const farm = farmMap.get(matchedFarmId)!;
+                finalAssignments.set(id, {
+                    farmId: matchedFarmId,
+                    distanceKm: Number(
+                        distanceKm(point, {
+                            lng: farm.longitude,
+                            lat: farm.latitude,
+                        }).toFixed(3),
+                    ),
+                });
+            }
+        }
+    }
+
+    return finalAssignments;
+}
+
 export async function GET(request: Request) {
     try {
         const { db } = await getDatabase();
         const { searchParams } = new URL(request.url);
         const type = (searchParams.get("type") ?? "wind") as EnergyType;
         const radiusKm = Number(searchParams.get("radiusKm") ?? "10");
+        const clusterKm = Number(searchParams.get("clusterKm") ?? "5");
         const province = (searchParams.get("province") ?? "").trim();
         const farmClauses = [energyMatchClause(type)];
         if (province) {
@@ -222,35 +382,23 @@ export async function GET(request: Request) {
                 image_url: string | null;
             }
         > = [];
+        const autoAssignments = assignByRadiusWithCluster(
+            enrichedRecognition,
+            farmMap,
+            Math.max(radiusKm, 0.1),
+            Math.max(clusterKm, 0.1),
+        );
 
         for (const recognition of enrichedRecognition) {
-            const point = {
-                lng: Number(recognition.longitude),
-                lat: Number(recognition.latitude),
-            };
-
-            let matchedFarmId: number | null = null;
-            let nearestDistance = Number.POSITIVE_INFINITY;
-
-            for (const farm of farmMap.values()) {
-                const distance = distanceKm(point, {
-                    lng: farm.longitude,
-                    lat: farm.latitude,
-                });
-                if (distance <= radiusKm && distance < nearestDistance) {
-                    matchedFarmId = farm.id;
-                    nearestDistance = distance;
-                }
-            }
-
-            if (matchedFarmId === null) {
+            const assignment = autoAssignments.get(recognition.id);
+            if (!assignment) {
                 outliers.push(recognition);
                 continue;
             }
 
-            farmMap.get(matchedFarmId)?.associated.push({
+            farmMap.get(assignment.farmId)?.associated.push({
                 ...recognition,
-                distance_km: Number(nearestDistance.toFixed(3)),
+                distance_km: assignment.distanceKm,
                 association_source: "auto",
             });
         }
