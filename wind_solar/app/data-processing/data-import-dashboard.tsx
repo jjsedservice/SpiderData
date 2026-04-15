@@ -65,6 +65,8 @@ type RecognitionRow = {
     city: string;
     longitude: string;
     latitude: string;
+    area?: string | null;
+    capacity?: string | null;
     image_exists: number;
     image_url?: string | null;
 };
@@ -81,6 +83,15 @@ type ImportState = {
     progress: number;
     message: string;
     loading: boolean;
+    error: string | null;
+};
+
+type ImageArchiveUploadState = {
+    open: boolean;
+    type: "solar" | "wind" | null;
+    file: File | null;
+    loading: boolean;
+    message: string;
     error: string | null;
 };
 
@@ -132,6 +143,12 @@ const provinceOptions = [
     "香港", "澳门",
 ];
 
+const powerTypeOptions = [
+    "风电",
+    "太阳能发电",
+    "分布式光伏",
+];
+
 function confidenceLabel(value: number) {
     return `${Math.round((value || 0) * 100)}%`;
 }
@@ -174,6 +191,7 @@ function DataSectionCard(props: {
 
 export default function DataImportDashboard() {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const imageArchiveInputRef = useRef<HTMLInputElement | null>(null);
     const [powerRows, setPowerRows] = useState<PowerFieldRow[]>([]);
     const [powerTotal, setPowerTotal] = useState(0);
     const [powerPage, setPowerPage] = useState(0);
@@ -215,11 +233,25 @@ export default function DataImportDashboard() {
         loading: false,
         error: null,
     });
+    const [imageArchiveUploadState, setImageArchiveUploadState] = useState<ImageArchiveUploadState>({
+        open: false,
+        type: null,
+        file: null,
+        loading: false,
+        message: "",
+        error: null,
+    });
 
     const solarExportHref = `/api/recognition?${new URLSearchParams({
         type: "solar",
         province: solarFilters.province,
         unlinkedOnly: String(solarFilters.unlinkedOnly),
+        format: "csv",
+    }).toString()}`;
+    const powerExportHref = `/api/power-fields?${new URLSearchParams({
+        keyword: powerFilters.keyword,
+        powerType: powerFilters.powerType,
+        confidenceLevel: powerFilters.confidenceLevel,
         format: "csv",
     }).toString()}`;
     const windExportHref = `/api/recognition?${new URLSearchParams({
@@ -299,6 +331,17 @@ export default function DataImportDashboard() {
         });
     }
 
+    function openImageArchiveDialog(type: "solar" | "wind") {
+        setImageArchiveUploadState({
+            open: true,
+            type,
+            file: null,
+            loading: false,
+            message: "",
+            error: null,
+        });
+    }
+
     async function startImport() {
         if (!importState.type || !importState.file) {
             setImportState((current) => ({ ...current, error: "请先选择导入文件" }));
@@ -369,6 +412,52 @@ export default function DataImportDashboard() {
                 ...current,
                 loading: false,
                 error: error instanceof Error ? error.message : "导入失败",
+            }));
+        }
+    }
+
+    async function uploadImageArchive() {
+        if (!imageArchiveUploadState.type || !imageArchiveUploadState.file) {
+            setImageArchiveUploadState((current) => ({
+                ...current,
+                error: "请先选择 ZIP 文件",
+            }));
+            return;
+        }
+
+        const uploadType = imageArchiveUploadState.type;
+        const uploadFile = imageArchiveUploadState.file;
+        const formData = new FormData();
+        formData.append("type", uploadType);
+        formData.append("file", uploadFile);
+
+        setImageArchiveUploadState((current) => ({
+            ...current,
+            loading: true,
+            error: null,
+            message: "正在上传并解压图片...",
+        }));
+
+        try {
+            const payload = await fetchJson<{ ok: true; copiedCount: number; message: string }>(
+                "/api/recognition/archive",
+                {
+                    method: "POST",
+                    body: formData,
+                },
+            );
+
+            await loadRecognition(uploadType);
+            setImageArchiveUploadState((current) => ({
+                ...current,
+                loading: false,
+                message: payload.message,
+            }));
+        } catch (error) {
+            setImageArchiveUploadState((current) => ({
+                ...current,
+                loading: false,
+                error: error instanceof Error ? error.message : "图片上传失败",
             }));
         }
     }
@@ -462,6 +551,15 @@ export default function DataImportDashboard() {
         await loadRecognition(type);
     }
 
+    async function cleanupRecognitionImages(type: "solar" | "wind") {
+        await fetchJson("/api/recognition", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "cleanup-images", type }),
+        });
+        await loadRecognition(type);
+    }
+
     return (
         <Stack spacing={3}>
             <DataSectionCard
@@ -481,19 +579,27 @@ export default function DataImportDashboard() {
                             }));
                         }}
                     />
-                    <TextField
-                        label="发电类型"
-                        size="small"
-                        sx={{ minWidth: 160, ...compactFieldSx }}
-                        value={powerFilters.powerType}
-                        onChange={(event) => {
-                            setPowerPage(0);
-                            setPowerFilters((current) => ({
-                                ...current,
-                                powerType: event.target.value,
-                            }));
-                        }}
-                    />
+                    <FormControl size="small" sx={{ minWidth: 160, ...compactFieldSx }}>
+                        <InputLabel>发电类型</InputLabel>
+                        <Select
+                            label="发电类型"
+                            value={powerFilters.powerType}
+                            onChange={(event) => {
+                                setPowerPage(0);
+                                setPowerFilters((current) => ({
+                                    ...current,
+                                    powerType: String(event.target.value),
+                                }));
+                            }}
+                        >
+                            <MenuItem value="">全部</MenuItem>
+                            {powerTypeOptions.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <FormControl size="small" sx={{ minWidth: 160, ...compactFieldSx }}>
                         <InputLabel>可信度</InputLabel>
                         <Select
@@ -543,6 +649,15 @@ export default function DataImportDashboard() {
                         variant="text"
                     >
                         下载模板
+                    </Button>
+                    <Button
+                        size="small"
+                        component="a"
+                        href={powerExportHref}
+                        startIcon={<DownloadIcon />}
+                        variant="text"
+                    >
+                        导出
                     </Button>
                     <Button
                         size="small"
@@ -710,10 +825,18 @@ export default function DataImportDashboard() {
                 setFilters={setSolarFilters}
                 error={solarError}
                 onImport={() => openImportDialog("solar-recognition")}
+                onUploadImages={() => openImageArchiveDialog("solar")}
                 exportHref={solarExportHref}
                 onDeleteFiltered={() =>
                     confirmAction("删除当前光伏搜索结果", "将根据当前搜索条件删除光伏识别数据。", async () =>
                         deleteRecognitionBatch("solar", "filtered"),
+                    )
+                }
+                onCleanupImages={() =>
+                    confirmAction(
+                        "删除未关联光伏图片",
+                        "将删除光伏图片目录中所有文件名不在光伏识别数据库中的图片文件。",
+                        async () => cleanupRecognitionImages("solar"),
                     )
                 }
                 onDeleteAll={() =>
@@ -738,10 +861,18 @@ export default function DataImportDashboard() {
                 setFilters={setWindFilters}
                 error={windError}
                 onImport={() => openImportDialog("wind-recognition")}
+                onUploadImages={() => openImageArchiveDialog("wind")}
                 exportHref={windExportHref}
                 onDeleteFiltered={() =>
                     confirmAction("删除当前风电搜索结果", "将根据当前搜索条件删除风电识别数据。", async () =>
                         deleteRecognitionBatch("wind", "filtered"),
+                    )
+                }
+                onCleanupImages={() =>
+                    confirmAction(
+                        "删除未关联风电图片",
+                        "将删除风电图片目录中所有文件名不在风电识别数据库中的图片文件。",
+                        async () => cleanupRecognitionImages("wind"),
                     )
                 }
                 onDeleteAll={() =>
@@ -763,6 +894,20 @@ export default function DataImportDashboard() {
                 hidden
                 onChange={(event) =>
                     setImportState((current) => ({
+                        ...current,
+                        file: event.target.files?.[0] ?? null,
+                        error: null,
+                    }))
+                }
+            />
+
+            <input
+                ref={imageArchiveInputRef}
+                type="file"
+                accept=".zip,application/zip"
+                hidden
+                onChange={(event) =>
+                    setImageArchiveUploadState((current) => ({
                         ...current,
                         file: event.target.files?.[0] ?? null,
                         error: null,
@@ -840,6 +985,53 @@ export default function DataImportDashboard() {
                 </DialogActions>
             </Dialog>
 
+            <Dialog
+                open={imageArchiveUploadState.open}
+                onClose={
+                    imageArchiveUploadState.loading
+                        ? undefined
+                        : () => setImageArchiveUploadState((current) => ({ ...current, open: false }))
+                }
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>上传识别图片 ZIP</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={2} sx={{ pt: 1 }}>
+                        <Button variant="outlined" onClick={() => imageArchiveInputRef.current?.click()}>
+                            {imageArchiveUploadState.file ? imageArchiveUploadState.file.name : "选择 ZIP 文件"}
+                        </Button>
+                        {imageArchiveUploadState.message ? (
+                            <Alert severity="success">{imageArchiveUploadState.message}</Alert>
+                        ) : null}
+                        {imageArchiveUploadState.error ? (
+                            <Alert severity="error">{imageArchiveUploadState.error}</Alert>
+                        ) : null}
+                        <Typography variant="body2" color="text.secondary">
+                            ZIP 会先解压到临时目录，再把图片复制到当前配置的识别图片目录，完成后自动清理临时文件。
+                        </Typography>
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    {!imageArchiveUploadState.loading ? (
+                        <Button
+                            onClick={() =>
+                                setImageArchiveUploadState((current) => ({ ...current, open: false }))
+                            }
+                        >
+                            关闭
+                        </Button>
+                    ) : null}
+                    <Button
+                        variant="contained"
+                        onClick={() => void uploadImageArchive()}
+                        disabled={imageArchiveUploadState.loading}
+                    >
+                        {imageArchiveUploadState.loading ? "上传中..." : "开始上传"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog((current) => ({ ...current, open: false }))}>
                 <DialogTitle>{confirmDialog.title}</DialogTitle>
                 <DialogContent>
@@ -877,13 +1069,16 @@ function RecognitionSection(props: {
     setFilters: Dispatch<SetStateAction<{ province: string; unlinkedOnly: boolean }>>;
     error: string | null;
     onImport: () => void;
+    onUploadImages: () => void;
     exportHref: string;
     onDeleteFiltered: () => void;
+    onCleanupImages: () => void;
     onDeleteAll: () => void;
     onDeleteRow: (id: number) => void;
 }) {
     const templateType = props.title.includes("光伏") ? "solar-recognition" : "wind-recognition";
     const selectedProvince = props.filters.province || null;
+    const isSolar = props.title.includes("光伏");
 
     return (
         <DataSectionCard title={props.title}>
@@ -952,6 +1147,9 @@ function RecognitionSection(props: {
                 >
                     导出
                 </Button>
+                <Button size="small" variant="text" onClick={props.onUploadImages}>
+                    上传图片 ZIP
+                </Button>
                 <Button size="small" startIcon={<CloudUploadIcon />} variant="outlined" onClick={props.onImport}>
                     导入
                 </Button>
@@ -968,6 +1166,14 @@ function RecognitionSection(props: {
                 </Button>
                 <Button
                     size="small"
+                    color="warning"
+                    startIcon={<DeleteIcon />}
+                    onClick={props.onCleanupImages}
+                >
+                    删除未关联图片
+                </Button>
+                <Button
+                    size="small"
                     color="error"
                     startIcon={<DeleteIcon />}
                     disabled={props.total === 0}
@@ -978,7 +1184,7 @@ function RecognitionSection(props: {
             </CardActions>
             {props.error ? <Alert severity="error">{props.error}</Alert> : null}
             <Box sx={{ overflowX: "auto" }}>
-                <Table size="small" sx={{ minWidth: 760, tableLayout: "fixed" }}>
+                <Table size="small" sx={{ minWidth: isSolar ? 980 : 760, tableLayout: "fixed" }}>
                     <TableHead>
                         <TableRow>
                             <TableCell
@@ -998,6 +1204,12 @@ function RecognitionSection(props: {
                             <TableCell sx={{ width: 80, minWidth: 80, maxWidth: 80 }}>图片</TableCell>
                             <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>经度</TableCell>
                             <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>纬度</TableCell>
+                            {isSolar ? (
+                                <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>面积</TableCell>
+                            ) : null}
+                            {isSolar ? (
+                                <TableCell sx={{ width: 120, minWidth: 120, maxWidth: 120 }}>容量</TableCell>
+                            ) : null}
                             <TableCell
                                 sx={{
                                     position: "sticky",
@@ -1110,6 +1322,34 @@ function RecognitionSection(props: {
                                 >
                                     {row.latitude}
                                 </TableCell>
+                                {isSolar ? (
+                                    <TableCell
+                                        sx={{
+                                            width: 120,
+                                            minWidth: 120,
+                                            maxWidth: 120,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {row.area || "-"}
+                                    </TableCell>
+                                ) : null}
+                                {isSolar ? (
+                                    <TableCell
+                                        sx={{
+                                            width: 120,
+                                            minWidth: 120,
+                                            maxWidth: 120,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {row.capacity || "-"}
+                                    </TableCell>
+                                ) : null}
                                 <TableCell
                                     sx={{
                                         position: "sticky",

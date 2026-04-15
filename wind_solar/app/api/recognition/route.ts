@@ -1,6 +1,7 @@
+import fs from "node:fs/promises";
 import { NextResponse } from "next/server";
 import { escapeSql, execRows, getDatabase } from "@/lib/db";
-import { findRecognitionImage } from "@/lib/recognition-images";
+import { clearRecognitionImageCache, findRecognitionImage, getRecognitionImageMap } from "@/lib/recognition-images";
 
 function toCsvValue(value: unknown) {
     const text = String(value ?? "");
@@ -28,6 +29,8 @@ type RecognitionDbRow = {
     city: string;
     longitude: string;
     latitude: string;
+    area?: string | null;
+    capacity?: string | null;
     image_exists: number;
 };
 
@@ -84,15 +87,31 @@ export async function GET(request: Request) {
 
         if (format === "csv") {
             const lines = [
-                ["原始图片", "省", "市", "经度", "纬度"].map(toCsvValue).join(","),
+                (
+                    type === "solar"
+                        ? ["原始图片", "省", "市", "经度", "纬度", "面积", "容量"]
+                        : ["原始图片", "省", "市", "经度", "纬度"]
+                ).map(toCsvValue).join(","),
                 ...filteredRows.map((row) =>
-                    [
-                        row.original_image,
-                        row.province_name,
-                        row.city,
-                        row.longitude,
-                        row.latitude,
-                    ]
+                    (
+                        type === "solar"
+                            ? [
+                                row.original_image,
+                                row.province_name,
+                                row.city,
+                                row.longitude,
+                                row.latitude,
+                                row.area ?? "",
+                                row.capacity ?? "",
+                            ]
+                            : [
+                                row.original_image,
+                                row.province_name,
+                                row.city,
+                                row.longitude,
+                                row.latitude,
+                            ]
+                    )
                         .map(toCsvValue)
                         .join(","),
                 ),
@@ -124,6 +143,33 @@ export async function DELETE(request: Request) {
         const body = await request.json();
         const { db, persist } = await getDatabase();
         const table = resolveTable(body.type);
+
+        if (body.mode === "cleanup-images") {
+            const type = body.type as "solar" | "wind";
+            const rows = execRows<RecognitionDbRow>(
+                db,
+                `SELECT original_image FROM ${table}`,
+            );
+            const validNames = new Set(rows.map((row) => String(row.original_image)));
+            const { map } = await getRecognitionImageMap(type);
+            let deletedCount = 0;
+
+            for (const [fileName, filePath] of map.entries()) {
+                if (validNames.has(fileName)) {
+                    continue;
+                }
+
+                await fs.unlink(filePath).catch(() => undefined);
+                deletedCount += 1;
+            }
+
+            await clearRecognitionImageCache(type);
+            return NextResponse.json({
+                ok: true,
+                deletedCount,
+                message: deletedCount > 0 ? `已删除 ${deletedCount} 张未关联图片` : "没有可删除的未关联图片",
+            });
+        }
 
         if (body.mode === "all") {
             db.run(`DELETE FROM ${table}`);

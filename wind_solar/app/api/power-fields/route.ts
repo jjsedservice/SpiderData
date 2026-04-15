@@ -14,6 +14,14 @@ function confidenceClause(level: string | null) {
     return "";
 }
 
+function toCsvValue(value: unknown) {
+    const text = String(value ?? "");
+    if (/[",\n]/.test(text)) {
+        return `"${text.replaceAll('"', '""')}"`;
+    }
+    return text;
+}
+
 export async function GET(request: Request) {
     const { db } = await getDatabase();
     const { searchParams } = new URL(request.url);
@@ -22,6 +30,7 @@ export async function GET(request: Request) {
     const keyword = (searchParams.get("keyword") ?? "").trim();
     const powerType = (searchParams.get("powerType") ?? "").trim();
     const confidenceLevel = searchParams.get("confidenceLevel");
+    const format = (searchParams.get("format") ?? "").trim();
 
     const clauses: string[] = [];
     const params: Record<string, unknown> = {};
@@ -52,14 +61,66 @@ export async function GET(request: Request) {
             resolvedWhere = resolvedWhere.replaceAll(`@${key}`, `'${escapeSql(String(value))}'`);
         }
     });
-    const total = execRows<{ count: number }>(
+    const total = execRows<{ count: number }>(db, `SELECT COUNT(*) as count FROM power_fields ${resolvedWhere}`)[0];
+    const allRows = execRows(
         db,
-        `SELECT COUNT(*) as count FROM power_fields ${resolvedWhere}`,
-    )[0];
-    const rows = execRows(
-        db,
-        `SELECT * FROM power_fields ${resolvedWhere} ORDER BY id DESC LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`,
+        `SELECT * FROM power_fields ${resolvedWhere} ORDER BY id DESC`,
     );
+
+    if (format === "csv") {
+        const lines = [
+            [
+                "企业名称",
+                "主体名称",
+                "站点名称",
+                "发电类型",
+                "装机容量",
+                "经度",
+                "纬度",
+                "补充信息",
+                "原始地址片段",
+                "标准化地址",
+                "省",
+                "市",
+                "区",
+                "乡镇街道",
+                "村社区",
+                "组社",
+                "可信度",
+            ].map(toCsvValue).join(","),
+            ...allRows.map((row) =>
+                [
+                    row.enterprise_name,
+                    row.subject_name,
+                    row.site_name,
+                    row.power_type,
+                    row.capacity,
+                    row.longitude,
+                    row.latitude,
+                    row.supplement,
+                    row.raw_address,
+                    row.standardized_address,
+                    row.province,
+                    row.city,
+                    row.district,
+                    row.town,
+                    row.village,
+                    row.group_name,
+                    row.confidence,
+                ].map(toCsvValue).join(","),
+            ),
+        ];
+
+        return new Response(`\uFEFF${lines.join("\n")}`, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/csv; charset=utf-8",
+                "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent("电场数据_导出.csv")}`,
+            },
+        });
+    }
+
+    const rows = allRows.slice((page - 1) * pageSize, page * pageSize);
 
     return NextResponse.json({ ok: true, rows, total: total?.count ?? 0 });
 }

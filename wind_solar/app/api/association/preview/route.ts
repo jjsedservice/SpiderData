@@ -47,6 +47,10 @@ type Point = {
     lat: number;
 };
 
+type ProvinceBoundary = {
+    rings: Point[][];
+};
+
 type EnrichedRecognitionRow = RecognitionRow & {
     image_url: string | null;
 };
@@ -172,6 +176,99 @@ async function enrichRecognition(type: EnergyType, row: RecognitionRow) {
 
 function uniqueById<T extends { id: number }>(items: T[]) {
     return Array.from(new Map(items.map((item) => [item.id, item])).values());
+}
+
+async function loadProvinceBoundary(province: string): Promise<ProvinceBoundary | null> {
+    const provinceAdcodeMap: Record<string, string> = {
+        北京: "110000",
+        天津: "120000",
+        河北: "130000",
+        山西: "140000",
+        内蒙古: "150000",
+        辽宁: "210000",
+        吉林: "220000",
+        黑龙江: "230000",
+        上海: "310000",
+        江苏: "320000",
+        浙江: "330000",
+        安徽: "340000",
+        福建: "350000",
+        江西: "360000",
+        山东: "370000",
+        河南: "410000",
+        湖北: "420000",
+        湖南: "430000",
+        广东: "440000",
+        广西: "450000",
+        海南: "460000",
+        重庆: "500000",
+        四川: "510000",
+        贵州: "520000",
+        云南: "530000",
+        西藏: "540000",
+        陕西: "610000",
+        甘肃: "620000",
+        青海: "630000",
+        宁夏: "640000",
+        新疆: "650000",
+        台湾: "710000",
+        香港: "810000",
+        澳门: "820000",
+    };
+    const adcode = provinceAdcodeMap[province];
+    if (!adcode) {
+        return null;
+    }
+
+    const response = await fetch(`https://geo.datav.aliyun.com/areas_v3/bound/${adcode}.json`, {
+        cache: "force-cache",
+    });
+    const payload = await response.json();
+    const rings: Point[][] = [];
+
+    for (const feature of payload.features ?? []) {
+        const geometry = feature.geometry;
+        if (geometry?.type === "Polygon") {
+            const [outerRing] = geometry.coordinates ?? [];
+            if (outerRing?.length) {
+                rings.push(outerRing.map(([lng, lat]: [number, number]) => ({ lng, lat })));
+            }
+        }
+        if (geometry?.type === "MultiPolygon") {
+            for (const polygon of geometry.coordinates ?? []) {
+                const [outerRing] = polygon;
+                if (outerRing?.length) {
+                    rings.push(outerRing.map(([lng, lat]: [number, number]) => ({ lng, lat })));
+                }
+            }
+        }
+    }
+
+    return rings.length ? { rings } : null;
+}
+
+function pointInRing(point: Point, ring: Point[]) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i].lng;
+        const yi = ring[i].lat;
+        const xj = ring[j].lng;
+        const yj = ring[j].lat;
+        const intersect =
+            yi > point.lat !== yj > point.lat &&
+            point.lng < ((xj - xi) * (point.lat - yi)) / ((yj - yi) || Number.EPSILON) + xi;
+        if (intersect) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
+function pointInProvince(point: Point, boundary: ProvinceBoundary | null) {
+    if (!boundary) {
+        return true;
+    }
+    return boundary.rings.some((ring) => pointInRing(point, ring));
 }
 
 function assignByRadiusWithCluster(
@@ -325,6 +422,7 @@ export async function GET(request: Request) {
         const radiusKm = Number(searchParams.get("radiusKm") ?? "10");
         const clusterKm = Number(searchParams.get("clusterKm") ?? "5");
         const province = (searchParams.get("province") ?? "").trim();
+        const provinceBoundary = province ? await loadProvinceBoundary(province) : null;
         const farmClauses = [energyMatchClause(type)];
         if (province) {
             farmClauses.push(provinceClause("province", province));
@@ -344,7 +442,11 @@ export async function GET(request: Request) {
              FROM power_fields
              WHERE ${farmClauses.join(" AND ")}
              ORDER BY enterprise_name ASC`,
-        ).filter((row) => parseCoordinate(String(row.longitude)) !== null && parseCoordinate(String(row.latitude)) !== null);
+        ).filter((row) => {
+            const lng = parseCoordinate(String(row.longitude));
+            const lat = parseCoordinate(String(row.latitude));
+            return lng !== null && lat !== null && pointInProvince({ lng, lat }, provinceBoundary);
+        });
 
         const recognitionRows = execRows<RecognitionRow>(
             db,
@@ -352,7 +454,11 @@ export async function GET(request: Request) {
              FROM ${recognitionTable}
              ${recognitionClauses.length ? `WHERE ${recognitionClauses.join(" AND ")}` : ""}
              ORDER BY id DESC`,
-        ).filter((row) => parseCoordinate(String(row.longitude)) !== null && parseCoordinate(String(row.latitude)) !== null);
+        ).filter((row) => {
+            const lng = parseCoordinate(String(row.longitude));
+            const lat = parseCoordinate(String(row.latitude));
+            return lng !== null && lat !== null && pointInProvince({ lng, lat }, provinceBoundary);
+        });
 
         const enrichedRecognition = await Promise.all(
             recognitionRows.map((row) => enrichRecognition(type, row)),

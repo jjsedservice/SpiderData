@@ -31,10 +31,7 @@ async function buildImageMap(root: string) {
     return map;
 }
 
-export async function findRecognitionImage(
-    type: "solar" | "wind",
-    fileName: string,
-): Promise<string | null> {
+export async function getRecognitionImageMap(type: "solar" | "wind") {
     const settings = await readSettings();
     const relativeDir = type === "solar" ? settings.solarImageDir : settings.windImageDir;
     const root = path.join(process.cwd(), "assets", relativeDir);
@@ -45,5 +42,26 @@ export async function findRecognitionImage(
         imageMaps.set(root, map);
     }
 
+    return { root, map };
+}
+
+export async function findRecognitionImage(
+    type: "solar" | "wind",
+    fileName: string,
+): Promise<string | null> {
+    const { map } = await getRecognitionImageMap(type);
+
     return map.get(fileName) ?? null;
+}
+
+export async function clearRecognitionImageCache(type?: "solar" | "wind") {
+    if (!type) {
+        imageMaps.clear();
+        return;
+    }
+
+    const settings = await readSettings();
+    const relativeDir = type === "solar" ? settings.solarImageDir : settings.windImageDir;
+    const root = path.join(process.cwd(), "assets", relativeDir);
+    imageMaps.delete(root);
 }

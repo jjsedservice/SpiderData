@@ -50,12 +50,12 @@ const importSchemas: Record<
         requiredFields: ["企业名称"],
     },
     "solar-recognition": {
-        headers: ["Tile_Name", "Longitude", "Latitude", "Empty_Column", "Province", "City_County"],
-        requiredFields: ["Tile_Name", "Longitude", "Latitude", "Province", "City_County"],
+        headers: ["Tile_Name", "Longitude", "Latitude", "Province", "City_County"],
+        requiredFields: ["Tile_Name", "Longitude", "Latitude"],
     },
     "wind-recognition": {
         headers: ["original_image", "turbine_lon", "turbine_lat", "province", "city"],
-        requiredFields: ["original_image", "turbine_lon", "turbine_lat", "province", "city"],
+        requiredFields: ["original_image", "turbine_lon", "turbine_lat"],
     },
 };
 
@@ -100,60 +100,75 @@ function toNumberValue(value: string | undefined) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
+function beginTransactionSafely(db: Awaited<ReturnType<typeof getDatabase>>["db"]) {
+    try {
+        db.run("ROLLBACK");
+    } catch {}
+    db.run("BEGIN TRANSACTION");
+}
+
 async function importPowerFields(rows: Record<string, string>[], jobId: string) {
     const { db, persist } = await getDatabase();
 
-    db.run("BEGIN TRANSACTION");
+    beginTransactionSafely(db);
 
-    for (const [index, row] of rows.entries()) {
-        db.run(`
-            INSERT INTO power_fields (
-                enterprise_name, subject_name, site_name, power_type, capacity, longitude, latitude, supplement,
-                raw_address, standardized_address, province, city, district, town, village,
-                group_name, confidence, updated_at
-            ) VALUES (
-                '${escapeSql(row["企业名称"] ?? "")}',
-                '${escapeSql(row["主体名称"] ?? "")}',
-                '${escapeSql(row["站点名称"] ?? "")}',
-                '${escapeSql(row["发电类型"] ?? "")}',
-                '${escapeSql(row["装机容量"] ?? "")}',
-                '${escapeSql(row["经度"] ?? "")}',
-                '${escapeSql(row["纬度"] ?? "")}',
-                '${escapeSql(row["括号补充信息"] ?? "")}',
-                '${escapeSql(row["原始地址片段"] ?? "")}',
-                '${escapeSql(row["标准化地址"] ?? "")}',
-                '${escapeSql(row["省"] ?? "")}',
-                '${escapeSql(row["市州"] ?? "")}',
-                '${escapeSql(row["区县"] ?? "")}',
-                '${escapeSql(row["乡镇街道"] ?? "")}',
-                '${escapeSql(row["村社区"] ?? "")}',
-                '${escapeSql(row["组社"] ?? "")}',
-                ${toNumberValue(row["经纬度可信度"]) ?? 0},
-                CURRENT_TIMESTAMP
-            )
-            ON CONFLICT(enterprise_name) DO UPDATE SET
-                subject_name=excluded.subject_name,
-                site_name=excluded.site_name,
-                power_type=excluded.power_type,
-                capacity=excluded.capacity,
-                longitude=excluded.longitude,
-                latitude=excluded.latitude,
-                supplement=excluded.supplement,
-                raw_address=excluded.raw_address,
-                standardized_address=excluded.standardized_address,
-                province=excluded.province,
-                city=excluded.city,
-                district=excluded.district,
-                town=excluded.town,
-                village=excluded.village,
-                group_name=excluded.group_name,
-                confidence=excluded.confidence,
-                updated_at=CURRENT_TIMESTAMP
-        `);
-        updateImportJob(jobId, { processed: index + 1, status: "running" });
+    try {
+        for (const [index, row] of rows.entries()) {
+            db.run(`
+                INSERT INTO power_fields (
+                    enterprise_name, subject_name, site_name, power_type, capacity, longitude, latitude, supplement,
+                    raw_address, standardized_address, province, city, district, town, village,
+                    group_name, confidence, updated_at
+                ) VALUES (
+                    '${escapeSql(row["企业名称"] ?? "")}',
+                    '${escapeSql(row["主体名称"] ?? "")}',
+                    '${escapeSql(row["站点名称"] ?? "")}',
+                    '${escapeSql(row["发电类型"] ?? "")}',
+                    '${escapeSql(row["装机容量"] ?? "")}',
+                    '${escapeSql(row["经度"] ?? "")}',
+                    '${escapeSql(row["纬度"] ?? "")}',
+                    '${escapeSql(row["括号补充信息"] ?? "")}',
+                    '${escapeSql(row["原始地址片段"] ?? "")}',
+                    '${escapeSql(row["标准化地址"] ?? "")}',
+                    '${escapeSql(row["省"] ?? "")}',
+                    '${escapeSql(row["市州"] ?? "")}',
+                    '${escapeSql(row["区县"] ?? "")}',
+                    '${escapeSql(row["乡镇街道"] ?? "")}',
+                    '${escapeSql(row["村社区"] ?? "")}',
+                    '${escapeSql(row["组社"] ?? "")}',
+                    ${toNumberValue(row["经纬度可信度"]) ?? 0},
+                    CURRENT_TIMESTAMP
+                )
+                ON CONFLICT(enterprise_name) DO UPDATE SET
+                    subject_name=excluded.subject_name,
+                    site_name=excluded.site_name,
+                    power_type=excluded.power_type,
+                    capacity=excluded.capacity,
+                    longitude=excluded.longitude,
+                    latitude=excluded.latitude,
+                    supplement=excluded.supplement,
+                    raw_address=excluded.raw_address,
+                    standardized_address=excluded.standardized_address,
+                    province=excluded.province,
+                    city=excluded.city,
+                    district=excluded.district,
+                    town=excluded.town,
+                    village=excluded.village,
+                    group_name=excluded.group_name,
+                    confidence=excluded.confidence,
+                    updated_at=CURRENT_TIMESTAMP
+            `);
+            updateImportJob(jobId, { processed: index + 1, status: "running" });
+        }
+
+        db.run("COMMIT");
+        await persist();
+    } catch (error) {
+        try {
+            db.run("ROLLBACK");
+        } catch {}
+        throw error;
     }
-    db.run("COMMIT");
-    await persist();
 }
 
 async function importRecognition(
@@ -167,39 +182,68 @@ async function importRecognition(
     const imageDir =
         type === "solar-recognition" ? settings.solarImageDir : settings.windImageDir;
     const imageNames = await collectImageNames(imageDir);
-    db.run("BEGIN TRANSACTION");
+    beginTransactionSafely(db);
 
-    for (const [index, row] of rows.entries()) {
-        const originalImage =
-            type === "solar-recognition" ? row["Tile_Name"] ?? "" : row["original_image"] ?? "";
-        const provinceCode =
-            type === "solar-recognition" ? row["Province"] ?? "" : row["province"] ?? "";
-        db.run(`
-            INSERT INTO ${tableName} (
-                original_image, province_code, province_name, city, longitude, latitude, image_exists, updated_at
-            ) VALUES (
-                '${escapeSql(originalImage)}',
-                '${escapeSql(provinceCode)}',
-                '${escapeSql(provinceMap[provinceCode.toLowerCase()] ?? provinceCode)}',
-                '${escapeSql(type === "solar-recognition" ? row["City_County"] ?? "" : row["city"] ?? "")}',
-                '${escapeSql(type === "solar-recognition" ? row["Longitude"] ?? "" : row["turbine_lon"] ?? "")}',
-                '${escapeSql(type === "solar-recognition" ? row["Latitude"] ?? "" : row["turbine_lat"] ?? "")}',
-                ${imageNames.has(originalImage) ? 1 : 0},
-                CURRENT_TIMESTAMP
-            )
-            ON CONFLICT(original_image) DO UPDATE SET
-                province_code=excluded.province_code,
-                province_name=excluded.province_name,
-                city=excluded.city,
-                longitude=excluded.longitude,
-                latitude=excluded.latitude,
-                image_exists=excluded.image_exists,
-                updated_at=CURRENT_TIMESTAMP
-        `);
-        updateImportJob(jobId, { processed: index + 1, status: "running" });
+    try {
+        for (const [index, row] of rows.entries()) {
+            const originalImage =
+                type === "solar-recognition" ? row["Tile_Name"] ?? "" : row["original_image"] ?? "";
+            const provinceCode =
+                type === "solar-recognition" ? row["Province"] ?? "" : row["province"] ?? "";
+            if (type === "solar-recognition") {
+                db.run(`
+                    INSERT INTO ${tableName} (
+                        original_image, province_code, province_name, city, longitude, latitude, area, capacity, image_exists, updated_at
+                    ) VALUES (
+                        '${escapeSql(originalImage)}',
+                        '${escapeSql(provinceCode)}',
+                        '${escapeSql(provinceMap[provinceCode.toLowerCase()] ?? provinceCode)}',
+                        '${escapeSql(row["City_County"] ?? "")}',
+                        '${escapeSql(row["Longitude"] ?? "")}',
+                        '${escapeSql(row["Latitude"] ?? "")}',
+                        '${escapeSql(row["Area"] ?? "")}',
+                        '${escapeSql(row["Capacity"] ?? "")}',
+                        ${imageNames.has(originalImage) ? 1 : 0},
+                        CURRENT_TIMESTAMP
+                    )
+                    ON CONFLICT(original_image) DO UPDATE SET
+                        province_code=excluded.province_code,
+                        province_name=excluded.province_name,
+                        city=excluded.city,
+                        longitude=excluded.longitude,
+                        latitude=excluded.latitude,
+                        area=excluded.area,
+                        capacity=excluded.capacity,
+                        image_exists=excluded.image_exists,
+                        updated_at=CURRENT_TIMESTAMP
+                `);
+            } else {
+                db.run(`
+                    INSERT INTO ${tableName} (
+                        original_image, province_code, province_name, city, longitude, latitude, image_exists, updated_at
+                    ) VALUES (
+                        '${escapeSql(originalImage)}',
+                        '${escapeSql(provinceCode)}',
+                        '${escapeSql(provinceMap[provinceCode.toLowerCase()] ?? provinceCode)}',
+                        '${escapeSql(row["city"] ?? "")}',
+                        '${escapeSql(row["turbine_lon"] ?? "")}',
+                        '${escapeSql(row["turbine_lat"] ?? "")}',
+                        ${imageNames.has(originalImage) ? 1 : 0},
+                        CURRENT_TIMESTAMP
+                    )
+                `);
+            }
+            updateImportJob(jobId, { processed: index + 1, status: "running" });
+        }
+
+        db.run("COMMIT");
+        await persist();
+    } catch (error) {
+        try {
+            db.run("ROLLBACK");
+        } catch {}
+        throw error;
     }
-    db.run("COMMIT");
-    await persist();
 }
 
 export async function startImport(type: ImportType, buffer: Buffer) {

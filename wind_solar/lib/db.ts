@@ -74,6 +74,8 @@ function initializeSchema(db: SqlDatabase) {
             city TEXT,
             longitude TEXT,
             latitude TEXT,
+            area TEXT,
+            capacity TEXT,
             image_exists INTEGER DEFAULT 0,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -81,7 +83,7 @@ function initializeSchema(db: SqlDatabase) {
 
         CREATE TABLE IF NOT EXISTS wind_recognition (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            original_image TEXT NOT NULL UNIQUE,
+            original_image TEXT NOT NULL,
             province_code TEXT,
             province_name TEXT,
             city TEXT,
@@ -111,6 +113,56 @@ function initializeSchema(db: SqlDatabase) {
     }
     if (!hasCapacityColumn) {
         db.run("ALTER TABLE power_fields ADD COLUMN capacity TEXT");
+    }
+
+    const solarColumns = db.exec("PRAGMA table_info(solar_recognition)");
+    const hasSolarAreaColumn = solarColumns[0]?.values.some((valueRow) => valueRow[1] === "area");
+    const hasSolarCapacityColumn = solarColumns[0]?.values.some((valueRow) => valueRow[1] === "capacity");
+    if (!hasSolarAreaColumn) {
+        db.run("ALTER TABLE solar_recognition ADD COLUMN area TEXT");
+    }
+    if (!hasSolarCapacityColumn) {
+        db.run("ALTER TABLE solar_recognition ADD COLUMN capacity TEXT");
+    }
+
+    const windTableSql = db.exec(`
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table' AND name = 'wind_recognition'
+    `);
+    const currentWindTableSql = String(windTableSql[0]?.values?.[0]?.[0] ?? "");
+    const windColumns = db.exec("PRAGMA table_info(wind_recognition)");
+    const hasPoiColumn = windColumns[0]?.values.some((valueRow) => valueRow[1] === "poi");
+    const needsWindRecognitionMigration = currentWindTableSql.includes("original_image TEXT NOT NULL UNIQUE");
+
+    if (needsWindRecognitionMigration) {
+        db.run(`
+            CREATE TABLE wind_recognition_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                original_image TEXT NOT NULL,
+                province_code TEXT,
+                province_name TEXT,
+                city TEXT,
+                longitude TEXT,
+                latitude TEXT,
+                image_exists INTEGER DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                ${hasPoiColumn ? ", poi TEXT" : ""}
+            )
+        `);
+        db.run(`
+            INSERT INTO wind_recognition_new (
+                id, original_image, province_code, province_name, city, longitude, latitude, image_exists, created_at, updated_at
+                ${hasPoiColumn ? ", poi" : ""}
+            )
+            SELECT
+                id, original_image, province_code, province_name, city, longitude, latitude, image_exists, created_at, updated_at
+                ${hasPoiColumn ? ", poi" : ""}
+            FROM wind_recognition
+        `);
+        db.run("DROP TABLE wind_recognition");
+        db.run("ALTER TABLE wind_recognition_new RENAME TO wind_recognition");
     }
 }
 

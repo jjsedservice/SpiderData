@@ -62,8 +62,8 @@ const templateMap = {
     },
     "solar-recognition": {
         downloadName: "光伏识别数据导入模板.csv",
-        header: ["Tile_Name", "Longitude", "Latitude", "Empty_Column", "Province", "City_County"],
-        sample: ["102602_56756.jpg", "101.80618286132812", "23.431749035651656", "", "yunnan", "个旧市"],
+        header: ["Tile_Name", "Longitude", "Latitude", "Province", "City_County", "Area", "Capacity"],
+        sample: ["102602_56756.jpg", "101.80618286132812", "23.431749035651656", "yunnan", "个旧市", "13500", "2.4"],
     },
     "wind-recognition": {
         downloadName: "风电识别数据导入模板.csv",
