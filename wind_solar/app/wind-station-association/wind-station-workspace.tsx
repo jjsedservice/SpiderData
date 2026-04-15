@@ -138,6 +138,18 @@ function downloadCsv(fileName: string, headers: string[], rows: Array<Record<str
     URL.revokeObjectURL(url);
 }
 
+async function fetchAssociationTable(sessionId: string, file: "merge" | "station") {
+    const payload = await fetchJson<{ ok: true; table: TablePayload }>(
+        `/api/wind-station-association/data?${new URLSearchParams({
+            sessionId,
+            file,
+            page: "1",
+            pageSize: "1000000",
+        }).toString()}`,
+    );
+    return payload.table;
+}
+
 function DataCard(props: { title: string; children: React.ReactNode }) {
     return (
         <Card
@@ -299,24 +311,18 @@ export default function WindStationWorkspace() {
         return () => window.clearInterval(timer);
     }, []);
 
-    const loadTable = useEffectEvent(async (file: "merge" | "station") => {
-        if (!session?.id) {
+    const loadTable = useEffectEvent(async (file: "merge" | "station", sessionId?: string) => {
+        const resolvedSessionId = sessionId ?? session?.id;
+        if (!resolvedSessionId) {
             return;
         }
 
-        const payload = await fetchJson<{ ok: true; table: TablePayload }>(
-            `/api/wind-station-association/data?${new URLSearchParams({
-                sessionId: session.id,
-                file,
-                page: "1",
-                pageSize: "1000000",
-            }).toString()}`,
-        );
+        const table = await fetchAssociationTable(resolvedSessionId, file);
 
         if (file === "merge") {
-            setMergeTable(payload.table);
+            setMergeTable(table);
         } else {
-            setStationTable(payload.table);
+            setStationTable(table);
         }
     });
 
@@ -401,6 +407,9 @@ export default function WindStationWorkspace() {
             setSession(payload.session);
             setStationTable(payload.table);
             setActiveStep(1);
+            setBestMaxDist(String(payload.session.match?.bestMaxDist ?? (Number(bestMaxDist) || 100)));
+            const fullStationTable = await fetchAssociationTable(payload.session.id, "station");
+            setStationTable(fullStationTable);
             setMessage("场站匹配完成，已生成 station.csv。");
         } catch (matchError) {
             setError(matchError instanceof Error ? matchError.message : "场站匹配失败");
@@ -449,6 +458,7 @@ export default function WindStationWorkspace() {
 
     const matchChartOption = useMemo(() => {
         const matchPoints = session?.match?.scanPoints ?? [];
+        const appliedBestMaxDist = session?.match?.bestMaxDist ?? (Number(bestMaxDist) || 100);
         return {
             tooltip: { trigger: "axis" },
             grid: { left: 52, right: 24, top: 36, bottom: 42 },
@@ -475,8 +485,8 @@ export default function WindStationWorkspace() {
                     markLine: {
                         symbol: "none",
                         lineStyle: { color: "#c62828", type: "dashed", width: 2 },
-                        label: { formatter: `当前匹配距离 ${bestMaxDist}km` },
-                        data: [{ xAxis: Number(bestMaxDist) || 100 }],
+                        label: { formatter: `当前匹配距离 ${appliedBestMaxDist}km` },
+                        data: [{ xAxis: appliedBestMaxDist }],
                     },
                 },
             ],
