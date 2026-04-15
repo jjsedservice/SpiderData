@@ -568,7 +568,7 @@ export default function WindStationWorkspace() {
                                 自动选择的聚类方案距离：{selectedTargetDist || "无"}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                红色虚线表示自动选择的取值。规则是：第一次出现相邻两个距离聚类数量相同，且该数量最接近当前省份场站总数时，取这两个值中的较大值。当前省份场站数：{session.scan.stationReferenceCount}
+                                红色虚线表示自动选择的取值。规则是：从左到右找到第一个台阶，也就是第一次出现相邻两个距离聚类数量相同的情况，并取这两个值中的较大值。当前省份场站数：{session.scan.stationReferenceCount}
                             </Typography>
                         </Stack>
 

@@ -344,44 +344,18 @@ function chooseSuggestedTargetDist(
     stationReferenceCount: number,
 ) {
     void segments;
+    void stationReferenceCount;
 
-    let bestPair: { distanceKm: number; diff: number; index: number } | null = null;
     for (let index = 0; index < scanPoints.length - 1; index += 1) {
         const current = scanPoints[index];
         const next = scanPoints[index + 1];
         if (current.count !== next.count) {
             continue;
         }
-        if (current.count > stationReferenceCount) {
-            continue;
-        }
-
-        const diff = Math.abs(current.count - stationReferenceCount);
-        if (!bestPair || diff < bestPair.diff || (diff === bestPair.diff && index < bestPair.index)) {
-            bestPair = {
-                distanceKm: next.distanceKm,
-                diff,
-                index,
-            };
-        }
+        return formatDistanceLabel(next.distanceKm);
     }
 
-    if (bestPair) {
-        return formatDistanceLabel(bestPair.distanceKm);
-    }
-
-    const nearestPoint = [...scanPoints]
-    .filter((point) => point.count <= stationReferenceCount)
-    .sort((a, b) => {
-        const diffA = Math.abs(a.count - stationReferenceCount);
-        const diffB = Math.abs(b.count - stationReferenceCount);
-        if (diffA !== diffB) {
-            return diffA - diffB;
-        }
-        return a.distanceKm - b.distanceKm;
-    })[0];
-
-    return nearestPoint ? formatDistanceLabel(nearestPoint.distanceKm) : null;
+    return scanPoints[0] ? formatDistanceLabel(scanPoints[0].distanceKm) : null;
 }
 
 function buildEdges(points: CoordinatePoint[], maxDistanceKm: number) {
