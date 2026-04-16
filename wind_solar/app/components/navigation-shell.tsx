@@ -24,8 +24,9 @@ type NavigationShellProps = {
 
 const navItems = [
   { href: "/data-processing", label: "数据导入" },
-  { href: "/map-display", label: "场站关联" },
+  // { href: "/map-display", label: "场站关联" },
   { href: "/wind-station-association", label: "风机场站关联" },
+  { href: "/solar-station-association", label: "光伏电场关联" },
 ];
 
 export default function NavigationShell({

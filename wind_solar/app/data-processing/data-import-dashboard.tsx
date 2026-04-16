@@ -35,7 +35,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 
 type PowerFieldRow = {
     id: number;
@@ -93,6 +93,12 @@ type ImageArchiveUploadState = {
     loading: boolean;
     message: string;
     error: string | null;
+};
+
+type ExcludeProvinceState = {
+    open: boolean;
+    province: string;
+    type: "solar" | "wind" | null;
 };
 
 const pageSize = 10;
@@ -240,6 +246,11 @@ export default function DataImportDashboard() {
         loading: false,
         message: "",
         error: null,
+    });
+    const [excludeProvinceState, setExcludeProvinceState] = useState<ExcludeProvinceState>({
+        open: false,
+        province: "",
+        type: null,
     });
 
     const solarExportHref = `/api/recognition?${new URLSearchParams({
@@ -560,6 +571,38 @@ export default function DataImportDashboard() {
         await loadRecognition(type);
     }
 
+    async function excludeOutOfProvinceRecognitionData(type: "solar" | "wind") {
+        const filters = type === "solar" ? solarFilters : windFilters;
+        setExcludeProvinceState({
+            open: true,
+            province: filters.province,
+            type,
+        });
+        try {
+            await fetchJson("/api/recognition", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mode: "exclude-out-of-province",
+                    type,
+                    province: filters.province,
+                }),
+            });
+            if (type === "solar") {
+                setSolarPage(0);
+            } else {
+                setWindPage(0);
+            }
+            await loadRecognition(type);
+        } finally {
+            setExcludeProvinceState({
+                open: false,
+                province: "",
+                type: null,
+            });
+        }
+    }
+
     return (
         <Stack spacing={3}>
             <DataSectionCard
@@ -844,6 +887,23 @@ export default function DataImportDashboard() {
                         deleteRecognitionBatch("solar", "all"),
                     )
                 }
+                extraDangerActions={(
+                    <Button
+                        size="small"
+                        color="warning"
+                        startIcon={<DeleteIcon />}
+                        disabled={!solarFilters.province || solarTotal === 0}
+                        onClick={() =>
+                            confirmAction(
+                                "排除省外光伏数据",
+                                `将检查当前所选省份“${solarFilters.province || ""}”的光伏坐标，并通过天地图接口删除不在该省内的数据。`,
+                                async () => excludeOutOfProvinceRecognitionData("solar"),
+                            )
+                        }
+                    >
+                        排除省外数据
+                    </Button>
+                )}
                 onDeleteRow={(id) =>
                     confirmAction("删除光伏识别数据", `将删除 ID=${id} 的光伏识别数据。`, async () =>
                         deleteRecognition("solar", id),
@@ -880,6 +940,23 @@ export default function DataImportDashboard() {
                         deleteRecognitionBatch("wind", "all"),
                     )
                 }
+                extraDangerActions={(
+                    <Button
+                        size="small"
+                        color="warning"
+                        startIcon={<DeleteIcon />}
+                        disabled={!windFilters.province || windTotal === 0}
+                        onClick={() =>
+                            confirmAction(
+                                "排除省外风机数据",
+                                `将检查当前所选省份“${windFilters.province || ""}”的风机坐标，并通过天地图接口删除不在该省内的数据。`,
+                                async () => excludeOutOfProvinceRecognitionData("wind"),
+                            )
+                        }
+                    >
+                        排除省外数据
+                    </Button>
+                )}
                 onDeleteRow={(id) =>
                     confirmAction("删除风电识别数据", `将删除 ID=${id} 的风电识别数据。`, async () =>
                         deleteRecognition("wind", id),
@@ -1055,6 +1132,18 @@ export default function DataImportDashboard() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog open={excludeProvinceState.open} PaperProps={{ sx: { minWidth: 360 } }}>
+                <DialogTitle>正在排除省外数据</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={2} sx={{ pt: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                            正在检查 {excludeProvinceState.province || "当前省份"} 的{excludeProvinceState.type === "solar" ? "光伏" : "风机"}坐标，并调用天地图接口删除省外记录，请稍候。
+                        </Typography>
+                        <LinearProgress />
+                    </Stack>
+                </DialogContent>
+            </Dialog>
         </Stack>
     );
 }
@@ -1075,6 +1164,7 @@ function RecognitionSection(props: {
     onCleanupImages: () => void;
     onDeleteAll: () => void;
     onDeleteRow: (id: number) => void;
+    extraDangerActions?: ReactNode;
 }) {
     const templateType = props.title.includes("光伏") ? "solar-recognition" : "wind-recognition";
     const selectedProvince = props.filters.province || null;
@@ -1181,6 +1271,7 @@ function RecognitionSection(props: {
                 >
                     删除所有
                 </Button>
+                {props.extraDangerActions}
             </CardActions>
             {props.error ? <Alert severity="error">{props.error}</Alert> : null}
             <Box sx={{ overflowX: "auto" }}>

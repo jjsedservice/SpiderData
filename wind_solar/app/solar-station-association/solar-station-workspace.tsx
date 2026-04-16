@@ -72,7 +72,7 @@ type StableSegment = {
     suggestedTargetDist: string;
 };
 
-type WindStationSession = {
+type SolarStationSession = {
     id: string;
     province: string;
     createdAt: string;
@@ -130,7 +130,7 @@ type ReportStationGroup = {
     ledgerCapacityMw: number;
     estimatedCapacityMw: number;
     physicalCenter: { longitude: number; latitude: number; text: string } | null;
-    turbinePoints: Array<{
+    panelPoints: Array<{
         longitude: number;
         latitude: number;
         imageName: string;
@@ -244,7 +244,7 @@ function downloadCsv(fileName: string, headers: string[], rows: Array<Record<str
 
 async function fetchAssociationTable(sessionId: string, file: "merge" | "station") {
     const payload = await fetchJson<{ ok: true; table: TablePayload }>(
-        `/api/wind-station-association/data?${new URLSearchParams({
+        `/api/solar-station-association/data?${new URLSearchParams({
             sessionId,
             file,
             page: "1",
@@ -416,7 +416,7 @@ function createClusterInfoContent(item: ClusterMarkerItem) {
             font-size:13px;
         ">
             <div style="font-weight:700;margin-bottom:6px;">聚类 #${item.clusterId}</div>
-            <div>风机数量：${item.count} 台</div>
+            <div>光伏数量：${item.count} 组</div>
             <div>中心坐标：${item.centerText}</div>
         </div>
     `;
@@ -610,7 +610,7 @@ function ResultsTable(props: {
     );
 }
 
-export default function WindStationWorkspace() {
+export default function SolarStationWorkspace() {
     const mapRef = useRef<HTMLDivElement | null>(null);
     const mapInstanceRef = useRef<AMapMapInstance | null>(null);
     const mapOverlaysRef = useRef<AMapOverlay[]>([]);
@@ -622,10 +622,10 @@ export default function WindStationWorkspace() {
     const [scriptReady, setScriptReady] = useState(false);
     const [mapScriptReady, setMapScriptReady] = useState(false);
     const [canLoadMapScript, setCanLoadMapScript] = useState(false);
-    const [session, setSession] = useState<WindStationSession | null>(null);
+    const [session, setSession] = useState<SolarStationSession | null>(null);
     const [activeStep, setActiveStep] = useState(0);
     const [province, setProvince] = useState("云南");
-    const [maxDistanceKm, setMaxDistanceKm] = useState("40");
+    const [maxDistanceKm, setMaxDistanceKm] = useState("10");
     const [stepKm, setStepKm] = useState("0.5");
     const [selectedTargetDist, setSelectedTargetDist] = useState("");
     const [bestMaxDist, setBestMaxDist] = useState("100");
@@ -820,8 +820,8 @@ export default function WindStationWorkspace() {
         setMessage(null);
 
         try {
-            const payload = await fetchJson<{ ok: true; session: WindStationSession; table: TablePayload }>(
-                "/api/wind-station-association/scan",
+            const payload = await fetchJson<{ ok: true; session: SolarStationSession; table: TablePayload }>(
+                "/api/solar-station-association/scan",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -865,8 +865,8 @@ export default function WindStationWorkspace() {
         setMessage(null);
 
         try {
-            const payload = await fetchJson<{ ok: true; session: WindStationSession; table: TablePayload }>(
-                "/api/wind-station-association/match",
+            const payload = await fetchJson<{ ok: true; session: SolarStationSession; table: TablePayload }>(
+                "/api/solar-station-association/match",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1018,7 +1018,7 @@ export default function WindStationWorkspace() {
         const idColumn = `${targetDist}_聚类序号`;
         const stationByClusterId = new Map<
             string,
-            Omit<ReportStationGroup, "turbinePoints" | "color">
+            Omit<ReportStationGroup, "panelPoints" | "color">
         >();
 
         for (const row of stationTable.rows) {
@@ -1069,11 +1069,11 @@ export default function WindStationWorkspace() {
             const siteKey = station.siteName || clusterId;
             const current = grouped.get(siteKey) ?? {
                 ...station,
-                turbinePoints: [],
+                panelPoints: [],
                 color: reportPalette[grouped.size % reportPalette.length]!,
             };
 
-            current.turbinePoints.push({
+            current.panelPoints.push({
                 longitude,
                 latitude,
                 imageName: String(row["原始图片"] ?? ""),
@@ -1087,7 +1087,7 @@ export default function WindStationWorkspace() {
     const reportSummary = useMemo(() => {
         const ledgerCapacityMw = reportGroups.reduce((sum, group) => sum + group.ledgerCapacityMw, 0);
         const estimatedCapacityMw = reportGroups.reduce(
-            (sum, group) => sum + (group.turbinePoints.length * 3),
+            (sum, group) => sum + group.estimatedCapacityMw,
             0,
         );
         return {
@@ -1205,7 +1205,7 @@ export default function WindStationWorkspace() {
         }
 
         for (const group of reportGroups) {
-            const gcjTurbinePoints = group.turbinePoints.map((point) => ({
+            const gcjTurbinePoints = group.panelPoints.map((point) => ({
                 ...wgs84ToGcj02(point.longitude, point.latitude),
                 imageName: point.imageName,
             }));
@@ -1263,7 +1263,7 @@ export default function WindStationWorkspace() {
                         <div style="padding:8px;background:#fff;">
                             <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:#15352d;">${group.siteName}</div>
                             <img
-                                src="/api/recognition/image?type=wind&name=${encodeURIComponent(turbinePoint.imageName)}"
+                                src="/api/recognition/image?type=solar&name=${encodeURIComponent(turbinePoint.imageName)}"
                                 alt="${turbinePoint.imageName}"
                                 style="display:block;width:220px;max-width:220px;height:auto;border-radius:8px;"
                             />

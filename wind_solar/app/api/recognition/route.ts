@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 import { escapeSql, execRows, getDatabase } from "@/lib/db";
 import { clearRecognitionImageCache, findRecognitionImage, getRecognitionImageMap } from "@/lib/recognition-images";
 
+const TIANDITU_KEY = "b0955d5fb6e62c7e90a97d8b3fa4a3f5";
+const PROVINCE_NAMES = [
+    "北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江",
+    "上海", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南",
+    "湖北", "湖南", "广东", "广西", "海南", "重庆", "四川", "贵州",
+    "云南", "西藏", "陕西", "甘肃", "青海", "宁夏", "新疆", "香港",
+    "澳门", "台湾",
+];
+
 function toCsvValue(value: unknown) {
     const text = String(value ?? "");
     if (/[",\n]/.test(text)) {
@@ -33,6 +42,66 @@ type RecognitionDbRow = {
     capacity?: string | null;
     image_exists: number;
 };
+
+function normalizeProvinceName(value: string | null | undefined) {
+    return String(value ?? "")
+        .trim()
+        .replace(/特别行政区$/u, "")
+        .replace(/壮族自治区$/u, "")
+        .replace(/回族自治区$/u, "")
+        .replace(/维吾尔自治区$/u, "")
+        .replace(/自治区$/u, "")
+        .replace(/省$/u, "")
+        .replace(/市$/u, "");
+}
+
+function detectProvinceFromText(value: string | null | undefined) {
+    const text = String(value ?? "").trim();
+    if (!text) {
+        return "";
+    }
+
+    for (const province of PROVINCE_NAMES) {
+        if (text.includes(province)) {
+            return province;
+        }
+    }
+
+    return normalizeProvinceName(text);
+}
+
+async function lookupProvinceByTianditu(longitude: number, latitude: number) {
+    const postStr = JSON.stringify({
+        lon: longitude,
+        lat: latitude,
+        ver: 1,
+    });
+    const url = `https://api.tianditu.gov.cn/geocoder?postStr=${encodeURIComponent(postStr)}&type=geocode&tk=${TIANDITU_KEY}`;
+    const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+    });
+
+    if (!response.ok) {
+        throw new Error(`天地图接口请求失败（${response.status}）`);
+    }
+
+    const text = await response.text();
+    const payload = JSON.parse(text.replace(/^\uFEFF/u, ""));
+    const componentProvince = detectProvinceFromText(
+        payload?.result?.addressComponent?.province ??
+        payload?.result?.addressComponent?.province_name,
+    );
+
+    if (componentProvince) {
+        return componentProvince;
+    }
+
+    return detectProvinceFromText(
+        payload?.result?.formatted_address ??
+        payload?.result?.address,
+    );
+}
 
 async function enrichRecognitionRows(
     type: "solar" | "wind",
@@ -181,6 +250,85 @@ export async function DELETE(request: Request) {
             db.run(`DELETE FROM ${table} WHERE id = ${Number(body.id ?? 0)}`);
             await persist();
             return NextResponse.json({ ok: true });
+        }
+
+        if (body.mode === "exclude-out-of-province") {
+            const recognitionType = body.type as "solar" | "wind";
+            if (recognitionType !== "wind" && recognitionType !== "solar") {
+                throw new Error("仅支持识别数据排除省外数据");
+            }
+
+            const selectedProvince = String(body.province ?? "").trim();
+            if (!selectedProvince) {
+                throw new Error("请先选择省份");
+            }
+
+            const normalizedProvince = normalizeProvinceName(selectedProvince);
+            const provinceLike = `%${selectedProvince}%`;
+            const rows = execRows<RecognitionDbRow>(
+                db,
+                `SELECT * FROM ${table} WHERE (province_name LIKE '${escapeSql(provinceLike)}' OR province_code LIKE '${escapeSql(provinceLike)}') ORDER BY id DESC`,
+            );
+
+            if (rows.length === 0) {
+                return NextResponse.json({
+                    ok: true,
+                    deletedCount: 0,
+                    checkedCount: 0,
+                    skippedCount: 0,
+                    message: `当前省份没有可检查的${recognitionType === "solar" ? "光伏" : "风电"}识别数据`,
+                });
+            }
+
+            const idsToDelete: number[] = [];
+            let checkedCount = 0;
+            let skippedCount = 0;
+            const provinceCache = new Map<string, string>();
+
+            for (let index = 0; index < rows.length; index += 5) {
+                const batch = rows.slice(index, index + 5);
+
+                await Promise.all(
+                    batch.map(async (row) => {
+                        const longitude = Number(row.longitude);
+                        const latitude = Number(row.latitude);
+
+                        if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+                            skippedCount += 1;
+                            return;
+                        }
+
+                        const cacheKey = `${longitude},${latitude}`;
+                        let detectedProvince = provinceCache.get(cacheKey);
+
+                        if (!detectedProvince) {
+                            detectedProvince = await lookupProvinceByTianditu(longitude, latitude);
+                            provinceCache.set(cacheKey, detectedProvince);
+                        }
+
+                        checkedCount += 1;
+
+                        if (normalizeProvinceName(detectedProvince) !== normalizedProvince) {
+                            idsToDelete.push(row.id);
+                        }
+                    }),
+                );
+            }
+
+            if (idsToDelete.length > 0) {
+                db.run(`DELETE FROM ${table} WHERE id IN (${idsToDelete.join(",")})`);
+                await persist();
+            }
+
+            return NextResponse.json({
+                ok: true,
+                deletedCount: idsToDelete.length,
+                checkedCount,
+                skippedCount,
+                message: idsToDelete.length > 0
+                    ? `已删除 ${idsToDelete.length} 条省外${recognitionType === "solar" ? "光伏" : "风机"}数据`
+                    : `未发现需要删除的省外${recognitionType === "solar" ? "光伏" : "风机"}数据`,
+            });
         }
 
         const clauses: string[] = [];

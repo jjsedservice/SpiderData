@@ -20,7 +20,7 @@ export type StableSegment = {
     suggestedTargetDist: string;
 };
 
-export type WindStationSession = {
+export type SolarStationSession = {
     id: string;
     province: string;
     createdAt: string;
@@ -47,7 +47,7 @@ export type WindStationSession = {
     };
 };
 
-type WindRecognitionRow = {
+type SolarRecognitionRow = {
     id: number;
     original_image: string;
     province_code: string;
@@ -266,41 +266,43 @@ function getSessionJsonPath(sessionId: string) {
     return path.join(getSessionDir(sessionId), "session.json");
 }
 
-async function readSession(sessionId: string): Promise<WindStationSession | null> {
+async function readSession(sessionId: string): Promise<SolarStationSession | null> {
     try {
         const content = await fs.readFile(getSessionJsonPath(sessionId), "utf-8");
-        return JSON.parse(content) as WindStationSession;
+        return JSON.parse(content) as SolarStationSession;
     } catch {
         return null;
     }
 }
 
-async function writeSession(session: WindStationSession) {
+async function writeSession(session: SolarStationSession) {
     await fs.mkdir(getSessionDir(session.id), { recursive: true });
     session.updatedAt = new Date().toISOString();
     await fs.writeFile(getSessionJsonPath(session.id), `${JSON.stringify(session, null, 2)}\n`, "utf-8");
 }
 
-async function loadWindRecognitionByProvince(province: string) {
+async function loadSolarRecognitionByProvince(province: string) {
     const { db } = await getDatabase();
-    const rows = execRows<WindRecognitionRow>(
+    const rows = execRows<SolarRecognitionRow>(
         db,
-        "SELECT * FROM wind_recognition ORDER BY id ASC",
+        "SELECT * FROM solar_recognition ORDER BY id ASC",
     );
     return rows.filter((row) =>
         provinceMatches(row.province_name, province) || provinceMatches(row.province_code, province),
     );
 }
 
-async function loadWindPowerFieldsByProvince(province: string) {
+async function loadSolarPowerFieldsByProvince(province: string) {
     const { db } = await getDatabase();
     const rows = execRows<PowerFieldRow>(
         db,
         "SELECT enterprise_name, subject_name, site_name, power_type, capacity, province, longitude, latitude FROM power_fields ORDER BY enterprise_name ASC",
     );
     return rows.filter((row) => {
-        const isWind = String(row.power_type ?? "").includes("风电");
-        return isWind && provinceMatches(row.province, province);
+        const isSolar =
+            String(row.power_type ?? "").includes("太阳能发电") ||
+            String(row.power_type ?? "").includes("分布式光伏");
+        return isSolar && provinceMatches(row.province, province);
     });
 }
 
@@ -378,7 +380,7 @@ export async function runClusterScan(input: {
     stepKm: number;
 }) {
     await ensureSessionRoot();
-    const sourceRows = await loadWindRecognitionByProvince(input.province);
+    const sourceRows = await loadSolarRecognitionByProvince(input.province);
     const validRows = sourceRows.filter((row) => {
         const longitude = parseCoordinate(String(row.longitude));
         const latitude = parseCoordinate(String(row.latitude));
@@ -386,10 +388,10 @@ export async function runClusterScan(input: {
     });
 
     if (!validRows.length) {
-        throw new Error("当前省份没有可用于聚类的风电识别坐标");
+        throw new Error("当前省份没有可用于聚类的光伏识别坐标");
     }
 
-    const stationReferenceCount = (await loadWindPowerFieldsByProvince(input.province)).length;
+    const stationReferenceCount = (await loadSolarPowerFieldsByProvince(input.province)).length;
     const distances = createScanRange(input.maxDistanceKm, input.stepKm);
     const points = validRows.map((row) => ({
         lon: Number(row.longitude),
@@ -403,6 +405,8 @@ export async function runClusterScan(input: {
         市: row.city ?? "",
         经度: row.longitude,
         纬度: row.latitude,
+        面积: row.area ?? "",
+        容量: row.capacity ?? "",
     })) as Array<Record<string, unknown>>;
     const baseHeaders = Object.keys(mergeRows[0] ?? {});
     const csvHeaders = [...baseHeaders];
@@ -472,7 +476,7 @@ export async function runClusterScan(input: {
         stationReferenceCount,
     );
     const sessionId = crypto.randomUUID();
-    const session: WindStationSession = {
+    const session: SolarStationSession = {
         id: sessionId,
         province: input.province,
         createdAt: new Date().toISOString(),
@@ -527,6 +531,7 @@ export async function runStationMatch(input: {
         longitude: number;
         latitude: number;
         count: number;
+        estimatedCapacity: number;
         center: string;
     }>();
     for (const row of mergeRows) {
@@ -536,15 +541,18 @@ export async function runStationMatch(input: {
         if (!clusterId || longitude === null || latitude === null) {
             continue;
         }
+        const panelCapacity = parseCoordinate(String(row["容量"] ?? "")) ?? 0;
         const current = grouped.get(clusterId) ?? {
             longitude: 0,
             latitude: 0,
             count: 0,
+            estimatedCapacity: 0,
             center: String(row[centerColumn] ?? ""),
         };
         current.longitude += longitude;
         current.latitude += latitude;
         current.count += 1;
+        current.estimatedCapacity += panelCapacity;
         current.center = current.center || String(row[centerColumn] ?? "");
         grouped.set(clusterId, current);
     }
@@ -553,7 +561,8 @@ export async function runStationMatch(input: {
         clusterId,
         longitude: summary.longitude / summary.count,
         latitude: summary.latitude / summary.count,
-        turbineCount: summary.count,
+        panelCount: summary.count,
+        estimatedCapacity: summary.estimatedCapacity,
         center: summary.center,
     }));
 
@@ -561,7 +570,7 @@ export async function runStationMatch(input: {
         throw new Error("当前聚类方案没有有效的聚类中心可用于场站匹配");
     }
 
-    const companyRows = (await loadWindPowerFieldsByProvince(session.province))
+    const companyRows = (await loadSolarPowerFieldsByProvince(session.province))
         .map((row) => ({
             ...row,
             longitude: parseCoordinate(String(row.longitude)),
@@ -571,7 +580,7 @@ export async function runStationMatch(input: {
         .filter((row) => row.longitude !== null && row.latitude !== null);
 
     if (!companyRows.length) {
-        throw new Error("当前省份没有可匹配的风电场站台账数据");
+        throw new Error("当前省份没有可匹配的光伏电场台账数据");
     }
 
     const matchScanPoints: SessionScanPoint[] = [];
@@ -595,7 +604,7 @@ export async function runStationMatch(input: {
                     continue;
                 }
 
-                const estimatedCapacity = clusterRow.turbineCount * 3.0;
+                const estimatedCapacity = clusterRow.estimatedCapacity;
                 const actualCapacity = Number.isFinite(companyRow.capacityNumber)
                     ? companyRow.capacityNumber
                     : 0;
@@ -613,7 +622,7 @@ export async function runStationMatch(input: {
                     score: totalScore,
                     data: {
                         聚类序号: clusterRow.clusterId,
-                        风机数量: clusterRow.turbineCount,
+                        光伏数量: clusterRow.panelCount,
                         物理中心: clusterRow.center,
                         企业名称: companyRow.enterprise_name,
                         主体名称: companyRow.subject_name,
@@ -653,7 +662,7 @@ export async function runStationMatch(input: {
 
     const stationHeaders = [
         "聚类序号",
-        "风机数量",
+        "光伏数量",
         "物理中心",
         "企业名称",
         "主体名称",
