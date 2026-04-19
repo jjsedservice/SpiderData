@@ -86,6 +86,7 @@ type SolarStationSession = {
         stepKm: number;
         rowCount: number;
         stationReferenceCount: number;
+        totalLedgerCapacityMw?: number;
         scanPoints: SessionScanPoint[];
         stableSegments: StableSegment[];
         suggestedTargetDist: string | null;
@@ -1018,7 +1019,9 @@ export default function SolarStationWorkspace() {
         const idColumn = `${targetDist}_聚类序号`;
         const stationByClusterId = new Map<
             string,
-            Omit<ReportStationGroup, "panelPoints" | "color">
+            Omit<ReportStationGroup, "panelPoints" | "color"> & {
+                stationKey: string;
+            }
         >();
 
         for (const row of stationTable.rows) {
@@ -1031,10 +1034,16 @@ export default function SolarStationWorkspace() {
             const centerLongitude = Number(longitudeText);
             const centerLatitude = Number(latitudeText);
 
+            const siteName = String(row["站点名称"] ?? "");
+            const enterpriseName = String(row["企业名称"] ?? "");
+            const subjectName = String(row["主体名称"] ?? "");
+            const stationKey = [enterpriseName, subjectName, siteName].join("||");
+
             stationByClusterId.set(clusterId, {
-                siteName: String(row["站点名称"] ?? ""),
-                enterpriseName: String(row["企业名称"] ?? ""),
-                subjectName: String(row["主体名称"] ?? ""),
+                siteName,
+                enterpriseName,
+                subjectName,
+                stationKey,
                 ledgerCapacityMw: Number(row["台账容量"] ?? 0) || 0,
                 estimatedCapacityMw: Number(row["预估容量"] ?? 0) || 0,
                 physicalCenter:
@@ -1066,7 +1075,7 @@ export default function SolarStationWorkspace() {
                 continue;
             }
 
-            const siteKey = station.siteName || clusterId;
+            const siteKey = station.stationKey || clusterId;
             const current = grouped.get(siteKey) ?? {
                 ...station,
                 panelPoints: [],
@@ -1085,7 +1094,24 @@ export default function SolarStationWorkspace() {
     }, [mergeTable.rows, session?.match?.targetDist, stationTable.rows]);
 
     const reportSummary = useMemo(() => {
-        const ledgerCapacityMw = reportGroups.reduce((sum, group) => sum + group.ledgerCapacityMw, 0);
+        const uniqueStationCapacity = new Map<string, number>();
+        for (const row of stationTable.rows) {
+            const siteName = String(row["站点名称"] ?? "");
+            const enterpriseName = String(row["企业名称"] ?? "");
+            const subjectName = String(row["主体名称"] ?? "");
+            const stationKey = [enterpriseName, subjectName, siteName].join("||");
+            if (!stationKey.replaceAll("|", "")) {
+                continue;
+            }
+            uniqueStationCapacity.set(stationKey, Number(row["台账容量"] ?? 0) || 0);
+        }
+
+        const matchedLedgerCapacityMw = [...uniqueStationCapacity.values()].reduce(
+            (sum, capacity) => sum + capacity,
+            0,
+        );
+        const ledgerCapacityMw =
+            session?.scan?.totalLedgerCapacityMw ?? matchedLedgerCapacityMw;
         const estimatedCapacityMw = reportGroups.reduce(
             (sum, group) => sum + group.estimatedCapacityMw,
             0,
@@ -1094,7 +1120,7 @@ export default function SolarStationWorkspace() {
             ledgerCapacityMw,
             estimatedCapacityMw,
         };
-    }, [reportGroups]);
+    }, [reportGroups, session?.scan?.totalLedgerCapacityMw, stationTable.rows]);
 
     useEffect(() => {
         if (!mapDistance && mapDistanceOptions.length) {

@@ -34,6 +34,7 @@ export type SolarStationSession = {
         stepKm: number;
         rowCount: number;
         stationReferenceCount: number;
+        totalLedgerCapacityMw: number;
         scanPoints: SessionScanPoint[];
         stableSegments: StableSegment[];
         suggestedTargetDist: string | null;
@@ -391,7 +392,12 @@ export async function runClusterScan(input: {
         throw new Error("当前省份没有可用于聚类的光伏识别坐标");
     }
 
-    const stationReferenceCount = (await loadSolarPowerFieldsByProvince(input.province)).length;
+    const powerFieldRows = await loadSolarPowerFieldsByProvince(input.province);
+    const stationReferenceCount = powerFieldRows.length;
+    const totalLedgerCapacityMw = powerFieldRows.reduce((sum, row) => {
+        const capacity = Number(row.capacity);
+        return sum + (Number.isFinite(capacity) ? capacity : 0);
+    }, 0);
     const distances = createScanRange(input.maxDistanceKm, input.stepKm);
     const points = validRows.map((row) => ({
         lon: Number(row.longitude),
@@ -490,6 +496,7 @@ export async function runClusterScan(input: {
             stepKm: input.stepKm,
             rowCount: mergeRows.length,
             stationReferenceCount,
+            totalLedgerCapacityMw,
             scanPoints,
             stableSegments,
             suggestedTargetDist,
