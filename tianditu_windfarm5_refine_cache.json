@@ -1,0 +1,2256 @@
+{
+  "云南省红河哈尼族彝族自治州弥勒市对门山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.189151",
+    "lat": "24.05502",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%AF%B9%E9%97%A8%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.189151",
+        "lat": "24.05502",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市对门山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市马龙区新屯风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.675877",
+    "lat": "25.320989",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E9%A9%AC%E9%BE%99%E5%8C%BA%E6%96%B0%E5%B1%AF%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.675877",
+        "lat": "25.320989",
+        "keyWord": "云南省曲靖市马龙区新屯风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市寻甸回族彝族自治县苏撒坡风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.163812",
+    "lat": "25.700588",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E5%AF%BB%E7%94%B8%E5%9B%9E%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E8%8B%8F%E6%92%92%E5%9D%A1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.163812",
+        "lat": "25.700588",
+        "keyWord": "云南省昆明市寻甸回族彝族自治县苏撒坡风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市宣威市金牛山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.467222",
+    "lat": "26.446262",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AE%A3%E5%A8%81%E5%B8%82%E9%87%91%E7%89%9B%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "104.467222",
+        "lat": "26.446262",
+        "keyWord": "云南省曲靖市宣威市金牛山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市卫泸风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.551644",
+    "lat": "24.363919",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%8D%AB%E6%B3%B8%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.551644",
+        "lat": "24.363919",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市卫泸风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市弥勒东风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.41978",
+    "lat": "24.3076",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%BC%A5%E5%8B%92%E4%B8%9C%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 91,
+        "level": "兴趣点",
+        "lon": "103.41978",
+        "lat": "24.3076",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市弥勒东风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省德宏傣族景颇族自治州芒市桃子树风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "98.692607",
+    "lat": "24.303225",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E5%BE%B7%E5%AE%8F%E5%82%A3%E6%97%8F%E6%99%AF%E9%A2%87%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%8A%92%E5%B8%82%E6%A1%83%E5%AD%90%E6%A0%91%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "兴趣点",
+        "lon": "98.692607",
+        "lat": "24.303225",
+        "keyWord": "云南省德宏傣族景颇族自治州芒市桃子树风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市富源县沙坡风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.071528",
+    "lat": "25.588382",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AF%8C%E6%BA%90%E5%8E%BF%E6%B2%99%E5%9D%A1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "104.071528",
+        "lat": "25.588382",
+        "keyWord": "云南省曲靖市富源县沙坡风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市宁蒗彝族自治县紫玛风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.868326",
+    "lat": "27.32118",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E5%AE%81%E8%92%97%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E7%B4%AB%E7%8E%9B%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "100.868326",
+        "lat": "27.32118",
+        "keyWord": "云南省丽江市宁蒗彝族自治县紫玛风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州泸西县红河老尖山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.765969",
+    "lat": "24.524165",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%B3%B8%E8%A5%BF%E5%8E%BF%E7%BA%A2%E6%B2%B3%E8%80%81%E5%B0%96%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.765969",
+        "lat": "24.524165",
+        "keyWord": "云南省红河哈尼族彝族自治州泸西县红河老尖山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州泸西县阿朝风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.752361",
+    "lat": "24.363783",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%B3%B8%E8%A5%BF%E5%8E%BF%E9%98%BF%E6%9C%9D%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.752361",
+        "lat": "24.363783",
+        "keyWord": "云南省红河哈尼族彝族自治州泸西县阿朝风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省楚雄彝族自治州大姚县三道景风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "101.219465",
+    "lat": "26.296801",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%A5%9A%E9%9B%84%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%A4%A7%E5%A7%9A%E5%8E%BF%E4%B8%89%E9%81%93%E6%99%AF%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 60,
+        "level": "区县及以上级行政区划",
+        "lon": "101.219465",
+        "lat": "26.296801",
+        "keyWord": "云南省楚雄彝族自治州大姚县三道景风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市会泽县严峰山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.382822",
+    "lat": "25.888685",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E4%BC%9A%E6%B3%BD%E5%8E%BF%E4%B8%A5%E5%B3%B0%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "103.382822",
+        "lat": "25.888685",
+        "keyWord": "云南省曲靖市会泽县严峰山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市宜良县中营风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.179291",
+    "lat": "24.960893",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E5%AE%9C%E8%89%AF%E5%8E%BF%E4%B8%AD%E8%90%A5%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.179291",
+        "lat": "24.960893",
+        "keyWord": "云南省昆明市宜良县中营风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州麻栗坡县云海风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.6988",
+    "lat": "23.12854",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E9%BA%BB%E6%A0%97%E5%9D%A1%E5%8E%BF%E4%BA%91%E6%B5%B7%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "104.6988",
+        "lat": "23.12854",
+        "keyWord": "云南省文山壮族苗族自治州麻栗坡县云海风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市富源县冒天水风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.180117",
+    "lat": "25.603917",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AF%8C%E6%BA%90%E5%8E%BF%E5%86%92%E5%A4%A9%E6%B0%B4%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "104.180117",
+        "lat": "25.603917",
+        "keyWord": "云南省曲靖市富源县冒天水风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州麻栗坡县凤凰风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "105.088734",
+    "lat": "23.337948",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E9%BA%BB%E6%A0%97%E5%9D%A1%E5%8E%BF%E5%87%A4%E5%87%B0%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 81,
+        "level": "区县及以上级行政区划",
+        "lon": "105.088734",
+        "lat": "23.337948",
+        "keyWord": "云南省文山壮族苗族自治州麻栗坡县凤凰风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州开远市剑角峰风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.27507",
+    "lat": "23.71739",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%80%E8%BF%9C%E5%B8%82%E5%89%91%E8%A7%92%E5%B3%B0%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 79,
+        "level": "区县及以上级行政区划",
+        "lon": "103.27507",
+        "lat": "23.71739",
+        "keyWord": "云南省红河哈尼族彝族自治州开远市剑角峰风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州开远市剑角峰风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.27507",
+    "lat": "23.71739",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%80%E8%BF%9C%E5%B8%82%E5%89%91%E8%A7%92%E5%B3%B0%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "103.27507",
+        "lat": "23.71739",
+        "keyWord": "云南省红河哈尼族彝族自治州开远市剑角峰风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市新平彝族傣族自治县哈科迪梁子风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "101.743167",
+    "lat": "24.227359",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E6%96%B0%E5%B9%B3%E5%BD%9D%E6%97%8F%E5%82%A3%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%93%88%E7%A7%91%E8%BF%AA%E6%A2%81%E5%AD%90%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 81,
+        "level": "区县及以上级行政区划",
+        "lon": "101.743167",
+        "lat": "24.227359",
+        "keyWord": "云南省玉溪市新平彝族傣族自治县哈科迪梁子风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市会泽县回龙梁子风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.156583",
+    "lat": "26.612081",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E4%BC%9A%E6%B3%BD%E5%8E%BF%E5%9B%9E%E9%BE%99%E6%A2%81%E5%AD%90%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 83,
+        "level": "区县及以上级行政区划",
+        "lon": "103.156583",
+        "lat": "26.612081",
+        "keyWord": "云南省曲靖市会泽县回龙梁子风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市基洛山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.38894",
+    "lat": "24.424214",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%9F%BA%E6%B4%9B%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.38894",
+        "lat": "24.424214",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市基洛山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市会泽县大海梁子风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.259158",
+    "lat": "26.226665",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E4%BC%9A%E6%B3%BD%E5%8E%BF%E5%A4%A7%E6%B5%B7%E6%A2%81%E5%AD%90%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 91,
+        "level": "兴趣点",
+        "lon": "103.259158",
+        "lat": "26.226665",
+        "keyWord": "云南省曲靖市会泽县大海梁子风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市富源县富源北光梁子风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.26966",
+    "lat": "25.7154",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AF%8C%E6%BA%90%E5%8E%BF%E5%AF%8C%E6%BA%90%E5%8C%97%E5%85%89%E6%A2%81%E5%AD%90%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 84,
+        "level": "区县及以上级行政区划",
+        "lon": "104.26966",
+        "lat": "25.7154",
+        "keyWord": "云南省曲靖市富源县富源北光梁子风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市寻甸回族彝族自治县巨龙梁风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.92414",
+    "lat": "25.77468",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E5%AF%BB%E7%94%B8%E5%9B%9E%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%B7%A8%E9%BE%99%E6%A2%81%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "102.92414",
+        "lat": "25.77468",
+        "keyWord": "云南省昆明市寻甸回族彝族自治县巨龙梁风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州文山市平坝风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.151539",
+    "lat": "23.277098",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%96%87%E5%B1%B1%E5%B8%82%E5%B9%B3%E5%9D%9D%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "104.151539",
+        "lat": "23.277098",
+        "keyWord": "云南省文山壮族苗族自治州文山市平坝风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省德宏傣族景颇族自治州芒市平河风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "98.664367",
+    "lat": "24.272603",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E5%BE%B7%E5%AE%8F%E5%82%A3%E6%97%8F%E6%99%AF%E9%A2%87%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%8A%92%E5%B8%82%E5%B9%B3%E6%B2%B3%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 76,
+        "level": "区县及以上级行政区划",
+        "lon": "98.664367",
+        "lat": "24.272603",
+        "keyWord": "云南省德宏傣族景颇族自治州芒市平河风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市弥勒东风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.41978",
+    "lat": "24.3076",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%BC%A5%E5%8B%92%E4%B8%9C%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 95,
+        "level": "兴趣点",
+        "lon": "103.41978",
+        "lat": "24.3076",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市弥勒东风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市师宗县弯子坡风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.946613",
+    "lat": "24.833861",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%B8%88%E5%AE%97%E5%8E%BF%E5%BC%AF%E5%AD%90%E5%9D%A1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 83,
+        "level": "区县及以上级行政区划",
+        "lon": "103.946613",
+        "lat": "24.833861",
+        "keyWord": "云南省曲靖市师宗县弯子坡风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市会泽县待补风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.498502",
+    "lat": "26.233661",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E4%BC%9A%E6%B3%BD%E5%8E%BF%E5%BE%85%E8%A1%A5%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.498502",
+        "lat": "26.233661",
+        "keyWord": "云南省曲靖市会泽县待补风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市宣威市文兴风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.489267",
+    "lat": "26.407736",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AE%A3%E5%A8%81%E5%B8%82%E6%96%87%E5%85%B4%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "104.489267",
+        "lat": "26.407736",
+        "keyWord": "云南省曲靖市宣威市文兴风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市宣威市昔腊嘟风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.399101",
+    "lat": "26.006976",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AE%A3%E5%A8%81%E5%B8%82%E6%98%94%E8%85%8A%E5%98%9F%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 90,
+        "level": "区县及以上级行政区划",
+        "lon": "104.399101",
+        "lat": "26.006976",
+        "keyWord": "云南省曲靖市宣威市昔腊嘟风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州开远市梅塘风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.166536",
+    "lat": "23.840173",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%80%E8%BF%9C%E5%B8%82%E6%A2%85%E5%A1%98%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.166536",
+        "lat": "23.840173",
+        "keyWord": "云南省红河哈尼族彝族自治州开远市梅塘风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州个旧市猴子山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.191998",
+    "lat": "23.358773",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%AA%E6%97%A7%E5%B8%82%E7%8C%B4%E5%AD%90%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.191998",
+        "lat": "23.358773",
+        "keyWord": "云南省红河哈尼族彝族自治州个旧市猴子山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省大理白族自治州祥云县白鹤厂风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.683438",
+    "lat": "25.488652",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E5%A4%A7%E7%90%86%E7%99%BD%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%A5%A5%E4%BA%91%E5%8E%BF%E7%99%BD%E9%B9%A4%E5%8E%82%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "100.683438",
+        "lat": "25.488652",
+        "keyWord": "云南省大理白族自治州祥云县白鹤厂风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市沾益区盘江风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.812935",
+    "lat": "25.710766",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E6%B2%BE%E7%9B%8A%E5%8C%BA%E7%9B%98%E6%B1%9F%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.812935",
+        "lat": "25.710766",
+        "keyWord": "云南省曲靖市沾益区盘江风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市竹园西风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.41464",
+    "lat": "24.1093",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E7%AB%B9%E5%9B%AD%E8%A5%BF%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "103.41464",
+        "lat": "24.1093",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市竹园西风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市陆良县竹子山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.795993",
+    "lat": "25.230689",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E9%99%86%E8%89%AF%E5%8E%BF%E7%AB%B9%E5%AD%90%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 90,
+        "level": "区县及以上级行政区划",
+        "lon": "103.795993",
+        "lat": "25.230689",
+        "keyWord": "云南省曲靖市陆良县竹子山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市麒麟区老古山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.922835",
+    "lat": "25.361712",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E9%BA%92%E9%BA%9F%E5%8C%BA%E8%80%81%E5%8F%A4%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.922835",
+        "lat": "25.361712",
+        "keyWord": "云南省曲靖市麒麟区老古山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市老寨风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.778119",
+    "lat": "23.347717",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E8%80%81%E5%AF%A8%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.778119",
+        "lat": "23.347717",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市老寨风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州个旧市老尖山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.186592",
+    "lat": "23.347958",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%AA%E6%97%A7%E5%B8%82%E8%80%81%E5%B0%96%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.186592",
+        "lat": "23.347958",
+        "keyWord": "云南省红河哈尼族彝族自治州个旧市老尖山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州丘北县老庄科风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.872542",
+    "lat": "24.078302",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%98%E5%8C%97%E5%8E%BF%E8%80%81%E5%BA%84%E7%A7%91%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.872542",
+        "lat": "24.078302",
+        "keyWord": "云南省文山壮族苗族自治州丘北县老庄科风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省楚雄彝族自治州大姚县老西山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "101.300313",
+    "lat": "25.725023",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%A5%9A%E9%9B%84%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%A4%A7%E5%A7%9A%E5%8E%BF%E8%80%81%E8%A5%BF%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 90,
+        "level": "区县及以上级行政区划",
+        "lon": "101.300313",
+        "lat": "25.725023",
+        "keyWord": "云南省楚雄彝族自治州大姚县老西山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昭通市永善县老路梁子风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.428745",
+    "lat": "27.64746",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%AD%E9%80%9A%E5%B8%82%E6%B0%B8%E5%96%84%E5%8E%BF%E8%80%81%E8%B7%AF%E6%A2%81%E5%AD%90%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 91,
+        "level": "兴趣点",
+        "lon": "103.428745",
+        "lat": "27.64746",
+        "keyWord": "云南省昭通市永善县老路梁子风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州丘北县舍得风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.778319",
+    "lat": "24.181245",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%98%E5%8C%97%E5%8E%BF%E8%88%8D%E5%BE%97%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.778319",
+        "lat": "24.181245",
+        "keyWord": "云南省文山壮族苗族自治州丘北县舍得风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州文山市菲古风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.806169",
+    "lat": "23.500892",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%96%87%E5%B1%B1%E5%B8%82%E8%8F%B2%E5%8F%A4%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.806169",
+        "lat": "23.500892",
+        "keyWord": "云南省文山壮族苗族自治州文山市菲古风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州丘北县蜜蜂山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.833511",
+    "lat": "24.151739",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%98%E5%8C%97%E5%8E%BF%E8%9C%9C%E8%9C%82%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.833511",
+        "lat": "24.151739",
+        "keyWord": "云南省文山壮族苗族自治州丘北县蜜蜂山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市宣威市西泽风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.804369",
+    "lat": "26.220406",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E5%AE%A3%E5%A8%81%E5%B8%82%E8%A5%BF%E6%B3%BD%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.804369",
+        "lat": "26.220406",
+        "keyWord": "云南省曲靖市宣威市西泽风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市华宁县起则风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.023408",
+    "lat": "24.419335",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E5%8D%8E%E5%AE%81%E5%8E%BF%E8%B5%B7%E5%88%99%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.023408",
+        "lat": "24.419335",
+        "keyWord": "云南省玉溪市华宁县起则风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市马龙区通泉风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.57548",
+    "lat": "25.43227",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E9%A9%AC%E9%BE%99%E5%8C%BA%E9%80%9A%E6%B3%89%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.57548",
+        "lat": "25.43227",
+        "keyWord": "云南省曲靖市马龙区通泉风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省大理白族自治州祥云县野猫山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.86231",
+    "lat": "25.657321",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E5%A4%A7%E7%90%86%E7%99%BD%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%A5%A5%E4%BA%91%E5%8E%BF%E9%87%8E%E7%8C%AB%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "100.86231",
+        "lat": "25.657321",
+        "keyWord": "云南省大理白族自治州祥云县野猫山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市曲靖市金槽风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.522511",
+    "lat": "25.875351",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E6%9B%B2%E9%9D%96%E5%B8%82%E9%87%91%E6%A7%BD%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 66,
+        "level": "区县及以上级行政区划",
+        "lon": "103.522511",
+        "lat": "25.875351",
+        "keyWord": "云南省曲靖市曲靖市金槽风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州丘北县金龙山风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.18956",
+    "lat": "24.0436",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%98%E5%8C%97%E5%8E%BF%E9%87%91%E9%BE%99%E5%B1%B1%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "104.18956",
+        "lat": "24.0436",
+        "keyWord": "云南省文山壮族苗族自治州丘北县金龙山风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省曲靖市罗平县阿岗风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.149024",
+    "lat": "25.088101",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%9B%B2%E9%9D%96%E5%B8%82%E7%BD%97%E5%B9%B3%E5%8E%BF%E9%98%BF%E5%B2%97%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "104.149024",
+        "lat": "25.088101",
+        "keyWord": "云南省曲靖市罗平县阿岗风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州泸西县阿朝风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.752361",
+    "lat": "24.363783",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%B3%B8%E8%A5%BF%E5%8E%BF%E9%98%BF%E6%9C%9D%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.752361",
+        "lat": "24.363783",
+        "keyWord": "云南省红河哈尼族彝族自治州泸西县阿朝风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州富宁县阿用风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "105.573122",
+    "lat": "24.059974",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%AF%8C%E5%AE%81%E5%8E%BF%E9%98%BF%E7%94%A8%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "105.573122",
+        "lat": "24.059974",
+        "keyWord": "云南省文山壮族苗族自治州富宁县阿用风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市古城区高美风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.119812",
+    "lat": "26.636473",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E5%8F%A4%E5%9F%8E%E5%8C%BA%E9%AB%98%E7%BE%8E%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "100.119812",
+        "lat": "26.636473",
+        "keyWord": "云南省丽江市古城区高美风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州马关县麦子箐风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.132807",
+    "lat": "22.999406",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E9%A9%AC%E5%85%B3%E5%8E%BF%E9%BA%A6%E5%AD%90%E7%AE%90%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "104.132807",
+        "lat": "22.999406",
+        "keyWord": "云南省文山壮族苗族自治州马关县麦子箐风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州砚山县黑巴风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.592759",
+    "lat": "23.580879",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%A0%9A%E5%B1%B1%E5%8E%BF%E9%BB%91%E5%B7%B4%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.592759",
+        "lat": "23.580879",
+        "keyWord": "云南省文山壮族苗族自治州砚山县黑巴风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省楚雄彝族自治州元谋县龙海古风电": {
+    "status": "success",
+    "message": "ok",
+    "lon": "101.961346",
+    "lat": "25.958816",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%A5%9A%E9%9B%84%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%85%83%E8%B0%8B%E5%8E%BF%E9%BE%99%E6%B5%B7%E5%8F%A4%E9%A3%8E%E7%94%B5\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 90,
+        "level": "区县及以上级行政区划",
+        "lon": "101.961346",
+        "lat": "25.958816",
+        "keyWord": "云南省楚雄彝族自治州元谋县龙海古风电"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市宁蒗彝族自治县老屋基风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.848327",
+    "lat": "27.089359",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E5%AE%81%E8%92%97%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E8%80%81%E5%B1%8B%E5%9F%BA%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "100.848327",
+        "lat": "27.089359",
+        "keyWord": "云南省丽江市宁蒗彝族自治县老屋基风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市宁蒗彝族自治县阿谷子风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.78287",
+    "lat": "27.66314",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E5%AE%81%E8%92%97%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E9%98%BF%E8%B0%B7%E5%AD%90%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "100.78287",
+        "lat": "27.66314",
+        "keyWord": "云南省丽江市宁蒗彝族自治县阿谷子风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市永胜县撒克代风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.894064",
+    "lat": "26.339636",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E6%B0%B8%E8%83%9C%E5%8E%BF%E6%92%92%E5%85%8B%E4%BB%A3%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "100.894064",
+        "lat": "26.339636",
+        "keyWord": "云南省丽江市永胜县撒克代风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省丽江市永胜县铁厂坪风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "100.502981",
+    "lat": "26.644965",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E4%B8%BD%E6%B1%9F%E5%B8%82%E6%B0%B8%E8%83%9C%E5%8E%BF%E9%93%81%E5%8E%82%E5%9D%AA%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "100.502981",
+        "lat": "26.644965",
+        "keyWord": "云南省丽江市永胜县铁厂坪风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市西山区锁奔多风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.434897",
+    "lat": "25.061011",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E8%A5%BF%E5%B1%B1%E5%8C%BA%E9%94%81%E5%A5%94%E5%A4%9A%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "102.434897",
+        "lat": "25.061011",
+        "keyWord": "云南省昆明市西山区锁奔多风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省文山壮族苗族自治州丘北县锦屏西风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "104.1928",
+    "lat": "24.04415",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%96%87%E5%B1%B1%E5%A3%AE%E6%97%8F%E8%8B%97%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%98%E5%8C%97%E5%8E%BF%E9%94%A6%E5%B1%8F%E8%A5%BF%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "104.1928",
+        "lat": "24.04415",
+        "keyWord": "云南省文山壮族苗族自治州丘北县锦屏西风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市东川区野牛风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.14858",
+    "lat": "26.14772",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E4%B8%9C%E5%B7%9D%E5%8C%BA%E9%87%8E%E7%89%9B%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.14858",
+        "lat": "26.14772",
+        "keyWord": "云南省昆明市东川区野牛风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市寻甸回族彝族自治县小白岩风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.346633",
+    "lat": "25.68489",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E5%AF%BB%E7%94%B8%E5%9B%9E%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%B0%8F%E7%99%BD%E5%B2%A9%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.346633",
+        "lat": "25.68489",
+        "keyWord": "云南省昆明市寻甸回族彝族自治县小白岩风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省昆明市寻甸回族彝族自治县巨龙梁风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.92414",
+    "lat": "25.77468",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E6%98%86%E6%98%8E%E5%B8%82%E5%AF%BB%E7%94%B8%E5%9B%9E%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%B7%A8%E9%BE%99%E6%A2%81%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 79,
+        "level": "区县及以上级行政区划",
+        "lon": "102.92414",
+        "lat": "25.77468",
+        "keyWord": "云南省昆明市寻甸回族彝族自治县巨龙梁风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市峨山彝族自治县双龙风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.455116",
+    "lat": "24.088277",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E5%B3%A8%E5%B1%B1%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%8F%8C%E9%BE%99%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "102.455116",
+        "lat": "24.088277",
+        "keyWord": "云南省玉溪市峨山彝族自治县双龙风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市峨山彝族自治县塔甸风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.156678",
+    "lat": "24.230591",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E5%B3%A8%E5%B1%B1%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%A1%94%E7%94%B8%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "102.156678",
+        "lat": "24.230591",
+        "keyWord": "云南省玉溪市峨山彝族自治县塔甸风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市新平彝族傣族自治县大田风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "101.716388",
+    "lat": "23.848467",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E6%96%B0%E5%B9%B3%E5%BD%9D%E6%97%8F%E5%82%A3%E6%97%8F%E8%87%AA%E6%B2%BB%E5%8E%BF%E5%A4%A7%E7%94%B0%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "101.716388",
+        "lat": "23.848467",
+        "keyWord": "云南省玉溪市新平彝族傣族自治县大田风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市易门县浦贝风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.277805",
+    "lat": "24.596427",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E6%98%93%E9%97%A8%E5%8E%BF%E6%B5%A6%E8%B4%9D%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "102.277805",
+        "lat": "24.596427",
+        "keyWord": "云南省玉溪市易门县浦贝风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市易门县铜厂风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.082801",
+    "lat": "24.666868",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E6%98%93%E9%97%A8%E5%8E%BF%E9%93%9C%E5%8E%82%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "102.082801",
+        "lat": "24.666868",
+        "keyWord": "云南省玉溪市易门县铜厂风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市通海县五垴山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.872315",
+    "lat": "24.121253",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E9%80%9A%E6%B5%B7%E5%8E%BF%E4%BA%94%E5%9E%B4%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "102.872315",
+        "lat": "24.121253",
+        "keyWord": "云南省玉溪市通海县五垴山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省玉溪市通海县拖甸风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.61411",
+    "lat": "24.214211",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%8E%89%E6%BA%AA%E5%B8%82%E9%80%9A%E6%B5%B7%E5%8E%BF%E6%8B%96%E7%94%B8%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "102.61411",
+        "lat": "24.214211",
+        "keyWord": "云南省玉溪市通海县拖甸风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州个旧市白石岩风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.029881",
+    "lat": "23.40057",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%AA%E6%97%A7%E5%B8%82%E7%99%BD%E7%9F%B3%E5%B2%A9%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.029881",
+        "lat": "23.40057",
+        "keyWord": "云南省红河哈尼族彝族自治州个旧市白石岩风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州个旧市莲花山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.22375",
+    "lat": "23.367353",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E4%B8%AA%E6%97%A7%E5%B8%82%E8%8E%B2%E8%8A%B1%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.22375",
+        "lat": "23.367353",
+        "keyWord": "云南省红河哈尼族彝族自治州个旧市莲花山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州建水县南庄风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.8232",
+    "lat": "23.71977",
+    "level": "社区村落",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BB%BA%E6%B0%B4%E5%8E%BF%E5%8D%97%E5%BA%84%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "社区村落",
+        "lon": "102.8232",
+        "lat": "23.71977",
+        "keyWord": "云南省红河哈尼族彝族自治州建水县南庄风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州建水县蚂蚁山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.793838",
+    "lat": "23.996985",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BB%BA%E6%B0%B4%E5%8E%BF%E8%9A%82%E8%9A%81%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "102.793838",
+        "lat": "23.996985",
+        "keyWord": "云南省红河哈尼族彝族自治州建水县蚂蚁山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州开远市马者哨风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.416068",
+    "lat": "23.739642",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%80%E8%BF%9C%E5%B8%82%E9%A9%AC%E8%80%85%E5%93%A8%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.416068",
+        "lat": "23.739642",
+        "keyWord": "云南省红河哈尼族彝族自治州开远市马者哨风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市太平风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.42096",
+    "lat": "24.42579",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%A4%AA%E5%B9%B3%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.42096",
+        "lat": "24.42579",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市太平风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市弥勒西风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.426222",
+    "lat": "24.411472",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%BC%A5%E5%8B%92%E8%A5%BF%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.426222",
+        "lat": "24.411472",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市弥勒西风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市永宁风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.400822",
+    "lat": "24.361274",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E6%B0%B8%E5%AE%81%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "103.400822",
+        "lat": "24.361274",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市永宁风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市绿水塘风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.327292",
+    "lat": "23.870978",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E7%BB%BF%E6%B0%B4%E5%A1%98%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.327292",
+        "lat": "23.870978",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市绿水塘风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市膳马风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.43918",
+    "lat": "24.42098",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E8%86%B3%E9%A9%AC%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "区县及以上级行政区划",
+        "lon": "103.43918",
+        "lat": "24.42098",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市膳马风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市齐格风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.512164",
+    "lat": "23.913356",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E9%BD%90%E6%A0%BC%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.512164",
+        "lat": "23.913356",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市齐格风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州弥勒市己白风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.234519",
+    "lat": "23.863142",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E5%BC%A5%E5%8B%92%E5%B8%82%E5%B7%B1%E7%99%BD%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 60,
+        "level": "区县及以上级行政区划",
+        "lon": "103.234519",
+        "lat": "23.863142",
+        "keyWord": "云南省红河哈尼族彝族自治州弥勒市己白风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州泸西县永三风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.808434",
+    "lat": "24.376012",
+    "level": "兴趣点",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E6%B3%B8%E8%A5%BF%E5%8E%BF%E6%B0%B8%E4%B8%89%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 100,
+        "level": "兴趣点",
+        "lon": "103.808434",
+        "lat": "24.376012",
+        "keyWord": "云南省红河哈尼族彝族自治州泸西县永三风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州石屏县大牛风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.336126",
+    "lat": "23.872233",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%9F%B3%E5%B1%8F%E5%8E%BF%E5%A4%A7%E7%89%9B%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "102.336126",
+        "lat": "23.872233",
+        "keyWord": "云南省红河哈尼族彝族自治州石屏县大牛风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州石屏县斐龙村风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.293448",
+    "lat": "23.857862",
+    "level": "社区村落",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%9F%B3%E5%B1%8F%E5%8E%BF%E6%96%90%E9%BE%99%E6%9D%91%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 80,
+        "level": "社区村落",
+        "lon": "102.293448",
+        "lat": "23.857862",
+        "keyWord": "云南省红河哈尼族彝族自治州石屏县斐龙村风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州石屏县梁冲风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.384942",
+    "lat": "23.982956",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%9F%B3%E5%B1%8F%E5%8E%BF%E6%A2%81%E5%86%B2%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "102.384942",
+        "lat": "23.982956",
+        "keyWord": "云南省红河哈尼族彝族自治州石屏县梁冲风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州石屏县矶应山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "102.479846",
+    "lat": "23.584144",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E7%9F%B3%E5%B1%8F%E5%8E%BF%E7%9F%B6%E5%BA%94%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "102.479846",
+        "lat": "23.584144",
+        "keyWord": "云南省红河哈尼族彝族自治州石屏县矶应山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市他期口风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.505544",
+    "lat": "23.515302",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E4%BB%96%E6%9C%9F%E5%8F%A3%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.505544",
+        "lat": "23.515302",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市他期口风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市冷泉风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.475533",
+    "lat": "23.250602",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E5%86%B7%E6%B3%89%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 75,
+        "level": "区县及以上级行政区划",
+        "lon": "103.475533",
+        "lat": "23.250602",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市冷泉风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市卢金山风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.415257",
+    "lat": "23.27246",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E5%8D%A2%E9%87%91%E5%B1%B1%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.415257",
+        "lat": "23.27246",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市卢金山风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市朵古风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.439679",
+    "lat": "23.460126",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E6%9C%B5%E5%8F%A4%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 85,
+        "level": "区县及以上级行政区划",
+        "lon": "103.439679",
+        "lat": "23.460126",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市朵古风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  },
+  "云南省红河哈尼族彝族自治州蒙自市老座基风电场": {
+    "status": "success",
+    "message": "ok",
+    "lon": "103.404289",
+    "lat": "23.239345",
+    "level": "区县及以上级行政区划",
+    "province": "",
+    "city": "",
+    "county": "",
+    "url": "http://api.tianditu.gov.cn/geocoder?ds={\"keyWord\":\"%E4%BA%91%E5%8D%97%E7%9C%81%E7%BA%A2%E6%B2%B3%E5%93%88%E5%B0%BC%E6%97%8F%E5%BD%9D%E6%97%8F%E8%87%AA%E6%B2%BB%E5%B7%9E%E8%92%99%E8%87%AA%E5%B8%82%E8%80%81%E5%BA%A7%E5%9F%BA%E9%A3%8E%E7%94%B5%E5%9C%BA\"}&tk=b0955d5fb6e62c7e90a97d8b3fa4a3f5",
+    "raw": {
+      "msg": "ok",
+      "location": {
+        "score": 87,
+        "level": "区县及以上级行政区划",
+        "lon": "103.404289",
+        "lat": "23.239345",
+        "keyWord": "云南省红河哈尼族彝族自治州蒙自市老座基风电场"
+      },
+      "searchVersion": "7.5.0V",
+      "status": "0"
+    }
+  }
+}
