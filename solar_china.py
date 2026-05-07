@@ -35,10 +35,10 @@ NAME_COL = "电场名称"
 OUTPUT_COL = "中文项目名"
 
 # DeepSeek
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+DEEPSEEK_API_KEY = "sk-e299423bcd1a454d8113046abc36f559"
 
 DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
-DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_MODEL = "deepseek-v4-flash"
 
 # 每次请求间隔
 SLEEP_SECONDS = 0.5
